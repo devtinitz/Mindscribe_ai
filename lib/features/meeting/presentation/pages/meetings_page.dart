@@ -5,6 +5,7 @@ import '../../domain/entities/meeting.dart';
 import '../controllers/meetings_controller.dart';
 import '../routes/app_routes.dart';
 import '../theme/app_colors.dart';
+import '../widgets/app_menu.dart';
 
 class MeetingsPage extends GetView<MeetingsController> {
   const MeetingsPage({super.key});
@@ -86,24 +87,31 @@ class MeetingsPage extends GetView<MeetingsController> {
         ),
         centerTitle: true,
         actions: [
-  Padding(
-    padding: const EdgeInsets.only(right: 16, top: 8),
-    child: FloatingActionButton.extended(
-      onPressed: () => Get.toNamed(AppRoutes.recorder),
-      backgroundColor: AppColors.primary,
-      elevation: 2,
-      icon: const Icon(Icons.mic_rounded, color: Colors.white, size: 18),
-      label: const Text(
-        'Nouvelle réunion',
-        style: TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.w600,
-          fontSize: 13,
-        ),
-      ),
-    ),
-  ),
-],
+          // ── Bouton Nouvelle réunion ──
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: FloatingActionButton.extended(
+              onPressed: () => Get.toNamed(AppRoutes.recorder),
+              backgroundColor: AppColors.primary,
+              elevation: 2,
+              icon: const Icon(Icons.mic_rounded, color: Colors.white, size: 18),
+              label: const Text(
+                'Nouvelle réunion',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          // ── Menu ──
+          const Padding(
+            padding: EdgeInsets.only(right: 12, top: 8),
+            child: AppMenu(),
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),

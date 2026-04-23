@@ -24,4 +24,9 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> logout() {
     return _remoteDataSource.logout();
   }
+
+  @override
+  Future<User> register({required String name, required String email, required String password}) {
+    return _remoteDataSource.register(name: name, email: email, password: password);
+  }
 }

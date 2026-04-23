@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 
 import '../bindings/meeting_binding.dart';
 import '../pages/login_page.dart';
+import '../pages/register_page.dart';
 import '../pages/meeting_detail_page.dart';
 import '../pages/meetings_page.dart';
 import '../pages/recording_page.dart';
@@ -12,6 +13,11 @@ abstract class AppPages {
     GetPage(
       name: AppRoutes.login,
       page: () => const LoginPage(),
+      binding: MeetingBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.register,
+      page: () => const RegisterPage(),
       binding: MeetingBinding(),
     ),
     GetPage(

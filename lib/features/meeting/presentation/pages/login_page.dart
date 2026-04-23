@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import '../controllers/auth_controller.dart';
+import '../routes/app_routes.dart';
 import '../theme/app_colors.dart';
 
 class LoginPage extends GetView<AuthController> {
@@ -57,7 +58,6 @@ class LoginPage extends GetView<AuthController> {
   Widget _buildHeader(bool isSmall) {
     return Column(
       children: [
-        // Icône logo avec halo
         Container(
           width: 72,
           height: 72,
@@ -96,7 +96,6 @@ class LoginPage extends GetView<AuthController> {
 
         const SizedBox(height: 8),
 
-        // Tagline avec badge animé
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -123,7 +122,6 @@ class LoginPage extends GetView<AuthController> {
           BoxShadow(
             color: AppColors.primary.withOpacity(0.06),
             blurRadius: 40,
-            spreadRadius: 0,
             offset: const Offset(0, 16),
           ),
           BoxShadow(
@@ -136,7 +134,7 @@ class LoginPage extends GetView<AuthController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ── Titre carte ───────────────────────────────────────────
+          // Titre
           Row(
             children: [
               Container(
@@ -163,15 +161,12 @@ class LoginPage extends GetView<AuthController> {
 
           Text(
             "Connectez-vous pour accéder à vos réunions",
-            style: TextStyle(
-              fontSize: 13,
-              color: AppColors.hint,
-            ),
+            style: TextStyle(fontSize: 13, color: AppColors.hint),
           ),
 
           const SizedBox(height: 28),
 
-          // ── Champs ────────────────────────────────────────────────
+          // Champs
           _InputField(
             controller: controller.emailController,
             label: "Adresse email",
@@ -185,17 +180,19 @@ class LoginPage extends GetView<AuthController> {
 
           const SizedBox(height: 10),
 
-          // ── Message d'erreur ──────────────────────────────────────
+          // Message d'erreur
           Obx(() {
             final msg = controller.errorMessage.value;
             if (msg == null) return const SizedBox.shrink();
             return Container(
               margin: const EdgeInsets.only(top: 6, bottom: 4),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
                 color: AppColors.danger.withOpacity(0.07),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.danger.withOpacity(0.2)),
+                border:
+                    Border.all(color: AppColors.danger.withOpacity(0.2)),
               ),
               child: Row(
                 children: [
@@ -216,7 +213,7 @@ class LoginPage extends GetView<AuthController> {
 
           const SizedBox(height: 22),
 
-          // ── Bouton connexion ──────────────────────────────────────
+          // Bouton connexion
           Obx(() {
             final loading = controller.isLoading.value;
             return GestureDetector(
@@ -278,7 +275,7 @@ class LoginPage extends GetView<AuthController> {
 
           const SizedBox(height: 16),
 
-          // ── Mot de passe oublié ───────────────────────────────────
+          // Mot de passe oublié
           Center(
             child: TextButton(
               onPressed: () {},
@@ -301,14 +298,45 @@ class LoginPage extends GetView<AuthController> {
 
   // ── Pied de page ──────────────────────────────────────────────────
   Widget _buildFooter() {
-    return Text(
-      "Usage interne — MindScribe AI © 2026",
-      textAlign: TextAlign.center,
-      style: TextStyle(
-        fontSize: 12,
-        color: AppColors.hint.withOpacity(0.7),
-      ),
-    ).animate(delay: 500.ms).fadeIn();
+    return Column(
+      children: [
+        // ── Lien inscription ──
+        GestureDetector(
+          onTap: () => Get.toNamed(AppRoutes.register),
+          child: RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(
+              text: 'Pas encore de compte ? ',
+              style: TextStyle(
+                fontSize: 14,
+                color: AppColors.hint,
+              ),
+              children: [
+                TextSpan(
+                  text: 'Créer un compte',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ).animate(delay: 400.ms).fadeIn(),
+
+        const SizedBox(height: 16),
+
+        // Copyright
+        Text(
+          "Usage interne — MindScribe AI © 2026",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 12,
+            color: AppColors.hint.withOpacity(0.7),
+          ),
+        ).animate(delay: 500.ms).fadeIn(),
+      ],
+    );
   }
 }
 
@@ -376,13 +404,11 @@ class _BackgroundPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
 
-    // Fond blanc de base
     canvas.drawRect(
       Rect.fromLTWH(0, 0, w, h),
       Paint()..color = Colors.white,
     );
 
-    // ── Blob 1 : bleu primaire, haut droite ───────────────────────
     _drawBlob(
       canvas,
       center: Offset(
@@ -393,7 +419,6 @@ class _BackgroundPainter extends CustomPainter {
       color: const Color(0xFF00004D).withOpacity(0.055),
     );
 
-    // ── Blob 2 : accent violet, centre gauche ─────────────────────
     _drawBlob(
       canvas,
       center: Offset(
@@ -404,7 +429,6 @@ class _BackgroundPainter extends CustomPainter {
       color: const Color(0xFF4F6FFF).withOpacity(0.055),
     );
 
-    // ── Blob 3 : mint, bas droite ─────────────────────────────────
     _drawBlob(
       canvas,
       center: Offset(
@@ -415,7 +439,6 @@ class _BackgroundPainter extends CustomPainter {
       color: const Color(0xFF00C9A7).withOpacity(0.05),
     );
 
-    // ── Petits cercles décoratifs ─────────────────────────────────
     _drawDot(canvas,
         Offset(w * 0.12, h * 0.08 + math.sin(t1 * 4) * 6),
         6,
@@ -436,7 +459,6 @@ class _BackgroundPainter extends CustomPainter {
         7,
         const Color(0xFF00004D).withOpacity(0.1));
 
-    // ── Lignes de grille très subtiles ────────────────────────────
     final linePaint = Paint()
       ..color = const Color(0xFF00004D).withOpacity(0.025)
       ..strokeWidth = 1;
@@ -520,8 +542,7 @@ class _InputField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide:
-              const BorderSide(color: AppColors.accent, width: 1.6),
+          borderSide: const BorderSide(color: AppColors.accent, width: 1.6),
         ),
       ),
     );
@@ -586,8 +607,7 @@ class _PasswordFieldState extends State<_PasswordField> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide:
-              const BorderSide(color: AppColors.accent, width: 1.6),
+          borderSide: const BorderSide(color: AppColors.accent, width: 1.6),
         ),
       ),
     );

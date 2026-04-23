@@ -17,6 +17,7 @@ import '../../domain/usecases/get_meeting_details.dart';
 import '../../domain/usecases/get_meetings.dart';
 import '../../domain/usecases/login_user.dart';
 import '../../domain/usecases/logout_user.dart';
+import '../../domain/usecases/register_user.dart';
 import '../../domain/usecases/search_meetings.dart';
 import '../../domain/usecases/start_recording.dart';
 import '../../domain/usecases/stop_recording.dart';
@@ -26,14 +27,10 @@ import '../controllers/meetings_controller.dart';
 import '../controllers/recorder_controller.dart';
 
 class MeetingBinding extends Bindings {
-  /// Base URL selon la plateforme :
-  /// - Web (Chrome)         → localhost (CORS géré par le navigateur)
-  /// - Émulateur Android    → 10.0.2.2 (IP spéciale qui pointe vers le PC hôte)
-  /// - Windows desktop      → localhost
   static String get _baseUrl {
     if (kIsWeb) return 'http://localhost:8000/api';
     if (defaultTargetPlatform == TargetPlatform.android) {
-      return 'http://192.168.1.27:8000/api';//ip du pc
+      return 'http://192.168.1.16:8000/api';
     }
     return 'http://localhost:8000/api';
   }
@@ -85,6 +82,7 @@ class MeetingBinding extends Bindings {
 
     _lazyPutIfAbsent<LoginUser>(() => LoginUser(Get.find<AuthRepository>()));
     _lazyPutIfAbsent<LogoutUser>(() => LogoutUser(Get.find<AuthRepository>()));
+    _lazyPutIfAbsent<RegisterUser>(() => RegisterUser(Get.find<AuthRepository>()));
     _lazyPutIfAbsent<GetMeetings>(
       () => GetMeetings(Get.find<MeetingRepository>()),
     );
@@ -105,7 +103,11 @@ class MeetingBinding extends Bindings {
     );
 
     _lazyPutIfAbsent<AuthController>(
-      () => AuthController(Get.find<LoginUser>(), Get.find<LogoutUser>()),
+      () => AuthController(
+        Get.find<LoginUser>(),
+        Get.find<LogoutUser>(),
+        Get.find<RegisterUser>(),
+      ),
     );
     _lazyPutIfAbsent<MeetingsController>(
       () => MeetingsController(

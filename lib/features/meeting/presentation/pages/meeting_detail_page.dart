@@ -5,6 +5,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import '../controllers/meetings_controller.dart';
 import '../theme/app_colors.dart';
+import '../widgets/app_menu.dart';
 
 class MeetingDetailPage extends GetView<MeetingsController> {
   const MeetingDetailPage({super.key});
@@ -29,12 +30,20 @@ class MeetingDetailPage extends GetView<MeetingsController> {
           Obx(() {
             final meeting = controller.selectedMeeting.value;
             if (meeting == null || meeting.status != 'done') {
-              return const SizedBox();
+              return const AppMenu();
             }
-            return IconButton(
-              onPressed: () => _exportPdf(meeting),
-              icon: const Icon(Icons.picture_as_pdf_rounded),
-              tooltip: 'Exporter en PDF',
+            return Row(
+              children: [
+                IconButton(
+                  onPressed: () => _exportPdf(meeting),
+                  icon: const Icon(Icons.picture_as_pdf_rounded),
+                  tooltip: 'Exporter en PDF',
+                ),
+                const Padding(
+                  padding: EdgeInsets.only(right: 8),
+                  child: AppMenu(),
+                ),
+              ],
             );
           }),
         ],

@@ -9,6 +9,12 @@ abstract class AuthRemoteDataSource {
     required String password,
   });
 
+  Future<UserModel> register({
+    required String name,
+    required String email,
+    required String password,
+  });
+
   Future<void> logout();
 
   Future<UserModel?> getCurrentUser();
@@ -32,10 +38,28 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }) async {
     final response = await _dio.post<Map<String, dynamic>>(
       '/auth/login',
-      data: {
-        'email': email,
-        'password': password,
-      },
+      data: {'email': email, 'password': password},
+    );
+
+    final data = response.data ?? <String, dynamic>{};
+    final token = data['token'] as String?;
+    if (token != null && token.isNotEmpty) {
+      await _prefs.setString(_tokenKey, token);
+      _dio.options.headers['Authorization'] = 'Bearer $token';
+    }
+
+    return UserModel.fromJson(data);
+  }
+
+  @override
+  Future<UserModel> register({
+    required String name,
+    required String email,
+    required String password,
+  }) async {
+    final response = await _dio.post<Map<String, dynamic>>(
+      '/auth/register',
+      data: {'name': name, 'email': email, 'password': password},
     );
 
     final data = response.data ?? <String, dynamic>{};
@@ -51,18 +75,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<UserModel?> getCurrentUser() async {
     final token = _prefs.getString(_tokenKey);
-    if (token == null || token.isEmpty) {
-      return null;
-    }
+    if (token == null || token.isEmpty) return null;
 
     _dio.options.headers['Authorization'] = 'Bearer $token';
     try {
       final response = await _dio.get<Map<String, dynamic>>('/auth/me');
       final data = response.data ?? <String, dynamic>{};
-      return UserModel.fromJson({
-        ...data,
-        'token': token,
-      });
+      return UserModel.fromJson({...data, 'token': token});
     } on DioException {
       return null;
     }
@@ -76,10 +95,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       try {
         await _dio.post<void>('/auth/logout');
       } on DioException {
-        // Logout server-side failure should not block local cleanup.
+        // ignore
       }
     }
-
     await _prefs.remove(_tokenKey);
     _dio.options.headers.remove('Authorization');
   }
