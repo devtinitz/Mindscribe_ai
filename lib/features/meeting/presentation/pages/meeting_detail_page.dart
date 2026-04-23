@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 import '../controllers/meetings_controller.dart';
 import '../theme/app_colors.dart';
 
@@ -8,7 +11,6 @@ class MeetingDetailPage extends GetView<MeetingsController> {
 
   @override
   Widget build(BuildContext context) {
-    // ── Charge le détail dès l'ouverture de la page ──
     final meetingId = Get.arguments as int?;
     if (meetingId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -23,35 +25,263 @@ class MeetingDetailPage extends GetView<MeetingsController> {
         backgroundColor: Colors.white,
         foregroundColor: AppColors.primary,
         elevation: 0,
+        actions: [
+          Obx(() {
+            final meeting = controller.selectedMeeting.value;
+            if (meeting == null || meeting.status != 'done') {
+              return const SizedBox();
+            }
+            return IconButton(
+              onPressed: () => _exportPdf(meeting),
+              icon: const Icon(Icons.picture_as_pdf_rounded),
+              tooltip: 'Exporter en PDF',
+            );
+          }),
+        ],
       ),
       body: Obx(() {
         final meeting = controller.selectedMeeting.value;
         final isLoading = controller.isLoading.value;
 
-        // ── Chargement initial ──
         if (isLoading && meeting == null) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        // ── Traitement en cours (pending / processing) ──
         if (meeting != null &&
             (meeting.status == 'pending' || meeting.status == 'processing')) {
           return _buildProcessingView(meeting.status);
         }
 
-        // ── Erreur ──
         if (meeting != null && meeting.status == 'failed') {
           return _buildErrorView(meeting.summary);
         }
 
-        // ── Aucun résultat ──
         if (meeting == null) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        // ── Résultat complet ──
         return _buildResultView(meeting, context);
       }),
+    );
+  }
+
+  // ── Export PDF ────────────────────────────────────────────────────
+  Future<void> _exportPdf(meeting) async {
+    final pdf = pw.Document();
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(40),
+        build: (context) => [
+          // ── En-tête ──
+          pw.Container(
+            padding: const pw.EdgeInsets.all(16),
+            decoration: pw.BoxDecoration(
+              color: PdfColor.fromHex('1a1a6e'),
+              borderRadius: pw.BorderRadius.circular(8),
+            ),
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text(
+                  'COMPTE-RENDU DE RÉUNION',
+                  style: pw.TextStyle(
+                    color: PdfColors.white,
+                    fontSize: 10,
+                    fontWeight: pw.FontWeight.bold,
+                    letterSpacing: 2,
+                  ),
+                ),
+                pw.SizedBox(height: 8),
+                pw.Text(
+                  meeting.title,
+                  style: pw.TextStyle(
+                    color: PdfColors.white,
+                    fontSize: 20,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.SizedBox(height: 4),
+                pw.Text(
+                  '${meeting.createdAt.day}/${meeting.createdAt.month}/${meeting.createdAt.year} à ${meeting.createdAt.hour.toString().padLeft(2, '0')}h${meeting.createdAt.minute.toString().padLeft(2, '0')}',
+                  style: const pw.TextStyle(
+                    color: PdfColors.white,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          pw.SizedBox(height: 24),
+
+          // ── Résumé ──
+          _pdfSection(
+            title: 'RÉSUMÉ',
+            color: PdfColor.fromHex('1a1a6e'),
+            child: pw.Text(
+              meeting.summary ?? 'Aucun résumé disponible.',
+              style: const pw.TextStyle(fontSize: 11, lineSpacing: 4),
+            ),
+          ),
+
+          pw.SizedBox(height: 16),
+
+          // ── Décisions ──
+          _pdfSection(
+            title: 'DÉCISIONS (${meeting.decisions.length})',
+            color: PdfColor.fromHex('7C3AED'),
+            child: meeting.decisions.isEmpty
+                ? pw.Text('Aucune décision.',
+                    style: const pw.TextStyle(fontSize: 11))
+                : pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: meeting.decisions
+                        .map<pw.Widget>((d) => pw.Padding(
+                              padding: const pw.EdgeInsets.only(bottom: 6),
+                              child: pw.Row(
+                                crossAxisAlignment:
+                                    pw.CrossAxisAlignment.start,
+                                children: [
+                                  pw.Container(
+                                    margin: const pw.EdgeInsets.only(
+                                        top: 5, right: 8),
+                                    width: 5,
+                                    height: 5,
+                                    decoration: const pw.BoxDecoration(
+                                      color: PdfColor.fromInt(0xFF7C3AED),
+                                      shape: pw.BoxShape.circle,
+                                    ),
+                                  ),
+                                  pw.Expanded(
+                                    child: pw.Text(d.toString(),
+                                        style: const pw.TextStyle(
+                                            fontSize: 11, lineSpacing: 3)),
+                                  ),
+                                ],
+                              ),
+                            ))
+                        .toList(),
+                  ),
+          ),
+
+          pw.SizedBox(height: 16),
+
+          // ── Tâches ──
+          _pdfSection(
+            title: 'TÂCHES (${meeting.tasks.length})',
+            color: PdfColor.fromHex('059669'),
+            child: meeting.tasks.isEmpty
+                ? pw.Text('Aucune tâche.',
+                    style: const pw.TextStyle(fontSize: 11))
+                : pw.Column(
+                    children: meeting.tasks.map<pw.Widget>((task) {
+                      return pw.Container(
+                        margin: const pw.EdgeInsets.only(bottom: 8),
+                        padding: const pw.EdgeInsets.all(10),
+                        decoration: pw.BoxDecoration(
+                          border: pw.Border.all(
+                              color: PdfColors.grey300, width: 0.5),
+                          borderRadius: pw.BorderRadius.circular(6),
+                        ),
+                        child: pw.Row(
+                          children: [
+                            pw.Container(
+                              width: 16,
+                              height: 16,
+                              margin: const pw.EdgeInsets.only(right: 10),
+                              decoration: pw.BoxDecoration(
+                                border: pw.Border.all(
+                                    color: PdfColor.fromHex('059669'),
+                                    width: 1.5),
+                                borderRadius: pw.BorderRadius.circular(3),
+                              ),
+                            ),
+                            pw.Expanded(
+                              child: pw.Column(
+                                crossAxisAlignment:
+                                    pw.CrossAxisAlignment.start,
+                                children: [
+                                  pw.Text(task.action,
+                                      style: pw.TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: pw.FontWeight.bold)),
+                                  pw.SizedBox(height: 2),
+                                  pw.Text('👤 ${task.assignee}',
+                                      style: const pw.TextStyle(
+                                          fontSize: 10,
+                                          color: PdfColors.grey600)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+          ),
+
+          pw.SizedBox(height: 32),
+
+          // ── Pied de page ──
+          pw.Divider(color: PdfColors.grey300),
+          pw.SizedBox(height: 8),
+          pw.Text(
+            'Généré par MindScribe AI — ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
+            style: const pw.TextStyle(
+                fontSize: 9, color: PdfColors.grey500),
+            textAlign: pw.TextAlign.center,
+          ),
+        ],
+      ),
+    );
+
+    await Printing.layoutPdf(
+      onLayout: (format) async => pdf.save(),
+      name: '${meeting.title}.pdf',
+    );
+  }
+
+  pw.Widget _pdfSection({
+    required String title,
+    required PdfColor color,
+    required pw.Widget child,
+  }) {
+    return pw.Container(
+      width: double.infinity,
+      padding: const pw.EdgeInsets.all(14),
+      decoration: pw.BoxDecoration(
+        color: PdfColors.white,
+        borderRadius: pw.BorderRadius.circular(8),
+        border: pw.Border.all(color: PdfColors.grey200),
+      ),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Row(
+            children: [
+              pw.Container(
+                width: 3,
+                height: 14,
+                color: color,
+                margin: const pw.EdgeInsets.only(right: 8),
+              ),
+              pw.Text(
+                title,
+                style: pw.TextStyle(
+                  fontSize: 11,
+                  fontWeight: pw.FontWeight.bold,
+                  color: color,
+                  letterSpacing: 1,
+                ),
+              ),
+            ],
+          ),
+          pw.SizedBox(height: 10),
+          child,
+        ],
+      ),
     );
   }
 
@@ -63,7 +293,6 @@ class MeetingDetailPage extends GetView<MeetingsController> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Animation
             Container(
               width: 80,
               height: 80,
@@ -99,7 +328,6 @@ class MeetingDetailPage extends GetView<MeetingsController> {
               ),
             ),
             const SizedBox(height: 32),
-            // Étapes visuelles
             _buildStep('🎙️', 'Audio reçu', true),
             _buildStep('📝', 'Transcription Whisper', status == 'processing'),
             _buildStep('🤖', 'Analyse GPT-4o', false),
@@ -167,8 +395,8 @@ class MeetingDetailPage extends GetView<MeetingsController> {
                   ? backendMessage
                   : 'L\'IA n\'a pas pu traiter cet enregistrement.',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                  fontSize: 13, color: AppColors.textSecondary),
+              style:
+                  TextStyle(fontSize: 13, color: AppColors.textSecondary),
             ),
             const SizedBox(height: 24),
             ElevatedButton(
@@ -188,7 +416,7 @@ class MeetingDetailPage extends GetView<MeetingsController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── En-tête ──
+          // En-tête
           Text(
             meeting.title,
             style: const TextStyle(
@@ -200,13 +428,32 @@ class MeetingDetailPage extends GetView<MeetingsController> {
           const SizedBox(height: 4),
           Text(
             '${meeting.createdAt.day}/${meeting.createdAt.month}/${meeting.createdAt.year} à ${meeting.createdAt.hour.toString().padLeft(2, '0')}h${meeting.createdAt.minute.toString().padLeft(2, '0')}',
-            style:
-                TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Bouton export PDF
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () => _exportPdf(meeting),
+              icon: const Icon(Icons.picture_as_pdf_rounded, size: 18),
+              label: const Text('Exporter en PDF'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                side: BorderSide(color: AppColors.primary),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
           ),
 
           const SizedBox(height: 20),
 
-          // ── Résumé ──
+          // Résumé
           _buildSection(
             icon: Icons.summarize_rounded,
             title: 'Résumé',
@@ -219,7 +466,7 @@ class MeetingDetailPage extends GetView<MeetingsController> {
 
           const SizedBox(height: 16),
 
-          // ── Décisions ──
+          // Décisions
           _buildSection(
             icon: Icons.gavel_rounded,
             title: 'Décisions (${meeting.decisions.length})',
@@ -235,8 +482,7 @@ class MeetingDetailPage extends GetView<MeetingsController> {
                               padding:
                                   const EdgeInsets.symmetric(vertical: 6),
                               child: Row(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Container(
                                     margin: const EdgeInsets.only(top: 7),
@@ -262,7 +508,7 @@ class MeetingDetailPage extends GetView<MeetingsController> {
 
           const SizedBox(height: 16),
 
-          // ── Tâches ──
+          // Tâches
           _buildSection(
             icon: Icons.task_alt_rounded,
             title: 'Tâches (${meeting.tasks.length})',
@@ -272,7 +518,8 @@ class MeetingDetailPage extends GetView<MeetingsController> {
                     style: TextStyle(
                         fontSize: 14, color: AppColors.textSecondary))
                 : Column(
-                    children: List.generate(meeting.tasks.length, (index) {
+                    children:
+                        List.generate(meeting.tasks.length, (index) {
                       final task = meeting.tasks[index];
                       return Container(
                         margin: const EdgeInsets.only(bottom: 8),

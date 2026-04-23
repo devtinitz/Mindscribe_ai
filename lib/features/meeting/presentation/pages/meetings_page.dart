@@ -56,7 +56,6 @@ class MeetingsPage extends GetView<MeetingsController> {
         backgroundColor: Colors.white,
         foregroundColor: AppColors.primary,
         elevation: 0,
-        // ── Bouton retour amélioré ──
         leading: Padding(
           padding: const EdgeInsets.only(left: 12),
           child: GestureDetector(
@@ -87,29 +86,24 @@ class MeetingsPage extends GetView<MeetingsController> {
         ),
         centerTitle: true,
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: GestureDetector(
-              onTap: () => Get.toNamed(AppRoutes.recorder),
-              child: Container(
-                width: 40,
-                height: 40,
-                margin: const EdgeInsets.symmetric(vertical: 8),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.07),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                      color: AppColors.primary.withOpacity(0.15), width: 1),
-                ),
-                child: const Icon(
-                  Icons.mic_none_rounded,
-                  size: 18,
-                  color: AppColors.primary,
-                ),
-              ),
-            ),
-          ),
-        ],
+  Padding(
+    padding: const EdgeInsets.only(right: 16, top: 8),
+    child: FloatingActionButton.extended(
+      onPressed: () => Get.toNamed(AppRoutes.recorder),
+      backgroundColor: AppColors.primary,
+      elevation: 2,
+      icon: const Icon(Icons.mic_rounded, color: Colors.white, size: 18),
+      label: const Text(
+        'Nouvelle réunion',
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+          fontSize: 13,
+        ),
+      ),
+    ),
+  ),
+],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -148,13 +142,11 @@ class MeetingsPage extends GetView<MeetingsController> {
                         Text(
                           'Aucune réunion trouvée.',
                           style: TextStyle(
-                              fontSize: 15,
-                              color: AppColors.textSecondary),
+                              fontSize: 15, color: AppColors.textSecondary),
                         ),
                         const SizedBox(height: 8),
                         TextButton(
-                          onPressed: () =>
-                              Get.toNamed(AppRoutes.recorder),
+                          onPressed: () => Get.toNamed(AppRoutes.recorder),
                           child: const Text('Commencer un enregistrement'),
                         ),
                       ],
@@ -162,23 +154,19 @@ class MeetingsPage extends GetView<MeetingsController> {
                   );
                 }
 
-                // ── Numérotation : inverse = la plus récente est la plus grande ──
                 final total = controller.meetings.length;
 
                 return RefreshIndicator(
                   onRefresh: controller.loadMeetings,
                   child: ListView.separated(
                     itemCount: total,
-                    separatorBuilder: (_, __) =>
-                        const SizedBox(height: 10),
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
                     itemBuilder: (_, index) {
                       final meeting = controller.meetings[index];
-                      // index 0 = la plus récente → numéro = total - index
                       final num = total - index;
-                      final displayTitle =
-                          meeting.title.trim().isEmpty
-                              ? 'Réunion $num'
-                              : meeting.title;
+                      final displayTitle = meeting.title.trim().isEmpty
+                          ? 'Réunion $num'
+                          : meeting.title;
 
                       return _MeetingCard(
                         meeting: meeting,
@@ -198,18 +186,6 @@ class MeetingsPage extends GetView<MeetingsController> {
               }),
             ),
           ],
-        ),
-      ),
-
-      // ── FAB ──
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Get.toNamed(AppRoutes.recorder),
-        backgroundColor: AppColors.primary,
-        icon: const Icon(Icons.mic_rounded, color: Colors.white),
-        label: const Text(
-          'Nouvelle réunion',
-          style:
-              TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
         ),
       ),
     );
@@ -245,7 +221,6 @@ class _MeetingCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              // Icône micro
               Container(
                 width: 44,
                 height: 44,
@@ -258,7 +233,6 @@ class _MeetingCard extends StatelessWidget {
               ),
               const SizedBox(width: 12),
 
-              // Titre + date
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -283,10 +257,9 @@ class _MeetingCard extends StatelessWidget {
                 ),
               ),
 
-              // Badge statut avec icône
               Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 10, vertical: 5),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
                   color: statusColor.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(999),

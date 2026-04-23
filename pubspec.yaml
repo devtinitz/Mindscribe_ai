@@ -19,6 +19,9 @@ dependencies:
 
   just_audio: ^0.9.40
 
+  pdf: ^3.10.8
+  printing: ^5.12.0
+
   # ⚡ State management
   get: ^4.6.6
 
