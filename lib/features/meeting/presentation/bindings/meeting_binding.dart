@@ -13,6 +13,7 @@ import '../../data/repositories/recorder_repository_impl.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/repositories/meeting_repository.dart';
 import '../../domain/repositories/recorder_repository.dart';
+import '../../domain/usecases/get_current_user.dart';
 import '../../domain/usecases/get_meeting_details.dart';
 import '../../domain/usecases/get_meetings.dart';
 import '../../domain/usecases/login_user.dart';
@@ -85,26 +86,15 @@ class MeetingBinding extends Bindings {
     _lazyPutIfAbsent<LoginUser>(() => LoginUser(Get.find<AuthRepository>()));
     _lazyPutIfAbsent<LogoutUser>(() => LogoutUser(Get.find<AuthRepository>()));
     _lazyPutIfAbsent<RegisterUser>(() => RegisterUser(Get.find<AuthRepository>()));
+    _lazyPutIfAbsent<GetCurrentUser>(() => GetCurrentUser(Get.find<AuthRepository>()));
     _lazyPutIfAbsent<SendTwoFactorCode>(() => SendTwoFactorCode(Get.find<AuthRepository>()));
     _lazyPutIfAbsent<VerifyTwoFactorCode>(() => VerifyTwoFactorCode(Get.find<AuthRepository>()));
-    _lazyPutIfAbsent<GetMeetings>(
-      () => GetMeetings(Get.find<MeetingRepository>()),
-    );
-    _lazyPutIfAbsent<GetMeetingDetails>(
-      () => GetMeetingDetails(Get.find<MeetingRepository>()),
-    );
-    _lazyPutIfAbsent<SearchMeetings>(
-      () => SearchMeetings(Get.find<MeetingRepository>()),
-    );
-    _lazyPutIfAbsent<StartRecording>(
-      () => StartRecording(Get.find<RecorderRepository>()),
-    );
-    _lazyPutIfAbsent<StopRecording>(
-      () => StopRecording(Get.find<RecorderRepository>()),
-    );
-    _lazyPutIfAbsent<UploadMeetingAudio>(
-      () => UploadMeetingAudio(Get.find<MeetingRepository>()),
-    );
+    _lazyPutIfAbsent<GetMeetings>(() => GetMeetings(Get.find<MeetingRepository>()));
+    _lazyPutIfAbsent<GetMeetingDetails>(() => GetMeetingDetails(Get.find<MeetingRepository>()));
+    _lazyPutIfAbsent<SearchMeetings>(() => SearchMeetings(Get.find<MeetingRepository>()));
+    _lazyPutIfAbsent<StartRecording>(() => StartRecording(Get.find<RecorderRepository>()));
+    _lazyPutIfAbsent<StopRecording>(() => StopRecording(Get.find<RecorderRepository>()));
+    _lazyPutIfAbsent<UploadMeetingAudio>(() => UploadMeetingAudio(Get.find<MeetingRepository>()));
 
     _lazyPutIfAbsent<AuthController>(
       () => AuthController(
@@ -113,6 +103,7 @@ class MeetingBinding extends Bindings {
         Get.find<RegisterUser>(),
         Get.find<SendTwoFactorCode>(),
         Get.find<VerifyTwoFactorCode>(),
+        Get.find<GetCurrentUser>(),
       ),
     );
     _lazyPutIfAbsent<MeetingsController>(

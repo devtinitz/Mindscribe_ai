@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../domain/entities/user.dart';
+import '../../domain/usecases/get_current_user.dart';
 import '../../domain/usecases/login_user.dart';
 import '../../domain/usecases/logout_user.dart';
 import '../../domain/usecases/register_user.dart';
@@ -17,6 +18,7 @@ class AuthController extends GetxController {
     this._registerUser,
     this._sendTwoFactorCode,
     this._verifyTwoFactorCode,
+    this._getCurrentUser,
   );
 
   final LoginUser _loginUser;
@@ -24,20 +26,35 @@ class AuthController extends GetxController {
   final RegisterUser _registerUser;
   final SendTwoFactorCode _sendTwoFactorCode;
   final VerifyTwoFactorCode _verifyTwoFactorCode;
+  final GetCurrentUser _getCurrentUser;
 
-  // ── Controllers de formulaires ────────────────────────────────────
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
   final twoFactorController = TextEditingController();
 
-  // ── État ──────────────────────────────────────────────────────────
   final isLoading = false.obs;
   final isVerifying = false.obs;
   final errorMessage = RxnString();
   final twoFactorError = RxnString();
   final currentUser = Rxn<User>();
+
+  // ── Charge le user au démarrage ───────────────────────────────────
+  @override
+  void onInit() {
+    super.onInit();
+    _loadCachedUser();
+  }
+
+  Future<void> _loadCachedUser() async {
+    try {
+      final user = await _getCurrentUser();
+      if (user != null) {
+        currentUser.value = user;
+      }
+    } catch (_) {}
+  }
 
   // ── Connexion → envoie code 2FA ───────────────────────────────────
   Future<void> login() async {
@@ -173,24 +190,20 @@ class AuthController extends GetxController {
 
   // ── Déconnexion ───────────────────────────────────────────────────
   Future<void> logout() async {
-    // 1. Reset état
     currentUser.value = null;
     errorMessage.value = null;
     twoFactorError.value = null;
 
-    // 2. Clear les champs
     emailController.clear();
     passwordController.clear();
     nameController.clear();
     confirmPasswordController.clear();
     twoFactorController.clear();
 
-    // 3. Appel serveur
     try {
       await _logoutUser();
     } catch (_) {}
 
-    // 4. Navigation après le frame suivant
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Get.offAllNamed(AppRoutes.login);
     });
