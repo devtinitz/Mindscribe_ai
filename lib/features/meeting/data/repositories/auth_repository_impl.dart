@@ -13,10 +13,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<User> login({
-    required String email,
-    required String password,
-  }) {
+  Future<User> login({required String email, required String password}) {
     return _remoteDataSource.login(email: email, password: password);
   }
 
@@ -26,7 +23,22 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<User> register({required String name, required String email, required String password}) {
-    return _remoteDataSource.register(name: name, email: email, password: password);
+  Future<User> register({
+    required String name,
+    required String email,
+    required String password,
+  }) {
+    return _remoteDataSource.register(
+        name: name, email: email, password: password);
+  }
+
+  @override
+  Future<void> sendTwoFactorCode() {
+    return _remoteDataSource.sendTwoFactorCode();
+  }
+
+  @override
+  Future<bool> verifyTwoFactorCode(String code) {
+    return _remoteDataSource.verifyTwoFactorCode(code);
   }
 }

@@ -15,4 +15,8 @@ abstract class AuthRepository {
   Future<void> logout();
 
   Future<User?> getCurrentUser();
+
+  Future<void> sendTwoFactorCode();
+
+  Future<bool> verifyTwoFactorCode(String code);
 }

@@ -5,47 +5,35 @@ import '../../domain/entities/meeting.dart';
 import '../controllers/meetings_controller.dart';
 import '../routes/app_routes.dart';
 import '../theme/app_colors.dart';
-import '../widgets/app_menu.dart';
+import '../widgets/app_sidebar.dart';
 
 class MeetingsPage extends GetView<MeetingsController> {
   const MeetingsPage({super.key});
 
   Color _statusColor(String status) {
     switch (status) {
-      case 'done':
-        return AppColors.success;
-      case 'failed':
-        return AppColors.danger;
-      case 'processing':
-        return AppColors.primary;
-      default:
-        return Colors.orange;
+      case 'done': return AppColors.success;
+      case 'failed': return AppColors.danger;
+      case 'processing': return AppColors.primary;
+      default: return Colors.orange;
     }
   }
 
   String _statusLabel(String status) {
     switch (status) {
-      case 'done':
-        return 'Terminé';
-      case 'failed':
-        return 'Erreur';
-      case 'processing':
-        return 'En cours...';
-      default:
-        return 'En attente';
+      case 'done': return 'Terminé';
+      case 'failed': return 'Erreur';
+      case 'processing': return 'En cours...';
+      default: return 'En attente';
     }
   }
 
   IconData _statusIcon(String status) {
     switch (status) {
-      case 'done':
-        return Icons.check_circle_rounded;
-      case 'failed':
-        return Icons.error_rounded;
-      case 'processing':
-        return Icons.autorenew_rounded;
-      default:
-        return Icons.hourglass_top_rounded;
+      case 'done': return Icons.check_circle_rounded;
+      case 'failed': return Icons.error_rounded;
+      case 'processing': return Icons.autorenew_rounded;
+      default: return Icons.hourglass_top_rounded;
     }
   }
 
@@ -53,26 +41,26 @@ class MeetingsPage extends GetView<MeetingsController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
+      drawer: const AppSidebar(),
       appBar: AppBar(
         backgroundColor: Colors.white,
         foregroundColor: AppColors.primary,
         elevation: 0,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 12),
-          child: GestureDetector(
-            onTap: () => Get.back(),
-            child: Container(
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.07),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                    color: AppColors.primary.withOpacity(0.15), width: 1),
-              ),
-              child: const Icon(
-                Icons.arrow_back_ios_new_rounded,
-                size: 16,
-                color: AppColors.primary,
+        leading: Builder(
+          builder: (ctx) => Padding(
+            padding: const EdgeInsets.only(left: 12),
+            child: GestureDetector(
+              onTap: () => Scaffold.of(ctx).openDrawer(),
+              child: Container(
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.07),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                      color: AppColors.primary.withOpacity(0.15), width: 1),
+                ),
+                child: const Icon(Icons.menu_rounded,
+                    size: 20, color: AppColors.primary),
               ),
             ),
           ),
@@ -87,9 +75,8 @@ class MeetingsPage extends GetView<MeetingsController> {
         ),
         centerTitle: true,
         actions: [
-          // ── Bouton Nouvelle réunion ──
           Padding(
-            padding: const EdgeInsets.only(top: 8),
+            padding: const EdgeInsets.only(right: 16, top: 8),
             child: FloatingActionButton.extended(
               onPressed: () => Get.toNamed(AppRoutes.recorder),
               backgroundColor: AppColors.primary,
@@ -105,19 +92,12 @@ class MeetingsPage extends GetView<MeetingsController> {
               ),
             ),
           ),
-          const SizedBox(width: 8),
-          // ── Menu ──
-          const Padding(
-            padding: EdgeInsets.only(right: 12, top: 8),
-            child: AppMenu(),
-          ),
         ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // ── Barre de recherche ──
             TextField(
               controller: controller.queryController,
               decoration: InputDecoration(
@@ -132,7 +112,6 @@ class MeetingsPage extends GetView<MeetingsController> {
             ),
             const SizedBox(height: 14),
 
-            // ── Liste ──
             Expanded(
               child: Obx(() {
                 if (controller.isLoading.value) {
@@ -200,8 +179,6 @@ class MeetingsPage extends GetView<MeetingsController> {
   }
 }
 
-// ─── Card réunion ─────────────────────────────────────────────────────────────
-
 class _MeetingCard extends StatelessWidget {
   const _MeetingCard({
     required this.meeting,
@@ -240,7 +217,6 @@ class _MeetingCard extends StatelessWidget {
                     color: AppColors.primary, size: 22),
               ),
               const SizedBox(width: 12),
-
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -264,7 +240,6 @@ class _MeetingCard extends StatelessWidget {
                   ],
                 ),
               ),
-
               Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -288,7 +263,6 @@ class _MeetingCard extends StatelessWidget {
                   ],
                 ),
               ),
-
               const SizedBox(width: 8),
               Icon(Icons.chevron_right_rounded, color: AppColors.hint),
             ],

@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import '../../models/meeting_model.dart';
 
 abstract class MeetingRemoteDataSource {
-  Future<MeetingModel> uploadMeetingAudio({
+  Future<MeetingModel> uploadMeetingAudio({ 
     required String audioFilePath,
     required String title,
   });

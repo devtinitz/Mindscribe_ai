@@ -18,6 +18,8 @@ import '../../domain/usecases/get_meetings.dart';
 import '../../domain/usecases/login_user.dart';
 import '../../domain/usecases/logout_user.dart';
 import '../../domain/usecases/register_user.dart';
+import '../../domain/usecases/send_two_factor_code.dart';
+import '../../domain/usecases/verify_two_factor_code.dart';
 import '../../domain/usecases/search_meetings.dart';
 import '../../domain/usecases/start_recording.dart';
 import '../../domain/usecases/stop_recording.dart';
@@ -30,7 +32,7 @@ class MeetingBinding extends Bindings {
   static String get _baseUrl {
     if (kIsWeb) return 'http://localhost:8000/api';
     if (defaultTargetPlatform == TargetPlatform.android) {
-      return 'http://192.168.1.16:8000/api';
+      return 'http://192.168.1.27:8000/api';
     }
     return 'http://localhost:8000/api';
   }
@@ -83,6 +85,8 @@ class MeetingBinding extends Bindings {
     _lazyPutIfAbsent<LoginUser>(() => LoginUser(Get.find<AuthRepository>()));
     _lazyPutIfAbsent<LogoutUser>(() => LogoutUser(Get.find<AuthRepository>()));
     _lazyPutIfAbsent<RegisterUser>(() => RegisterUser(Get.find<AuthRepository>()));
+    _lazyPutIfAbsent<SendTwoFactorCode>(() => SendTwoFactorCode(Get.find<AuthRepository>()));
+    _lazyPutIfAbsent<VerifyTwoFactorCode>(() => VerifyTwoFactorCode(Get.find<AuthRepository>()));
     _lazyPutIfAbsent<GetMeetings>(
       () => GetMeetings(Get.find<MeetingRepository>()),
     );
@@ -107,6 +111,8 @@ class MeetingBinding extends Bindings {
         Get.find<LoginUser>(),
         Get.find<LogoutUser>(),
         Get.find<RegisterUser>(),
+        Get.find<SendTwoFactorCode>(),
+        Get.find<VerifyTwoFactorCode>(),
       ),
     );
     _lazyPutIfAbsent<MeetingsController>(

@@ -138,11 +138,12 @@ PROMPT;
     private function transcribeWithWhisper(string $audioPath): string
 {
     // Mode simulation — pas besoin d'OpenAI
-    return "Ceci est une transcription simulée de la réunion. 
-            Jean s'occupera du backend avant vendredi. 
-            Marie gère le design de l'application. 
+    return "C'est une transcription simulée de la réunion.  
+            C'est une réunion de suivi du projet MindScribe AI. 
+            Christophe s'occupera du backend avant vendredi. 
+            Hans gère le design de l'application. 
             On a décidé de livrer la version 1 la semaine prochaine.
-            Le budget alloué est de 5000 euros.";
+            Le budget alloué est de 500000 FCFA.";
 }
 
 private function analyzeWithGPT(string $transcription): array
@@ -152,12 +153,12 @@ private function analyzeWithGPT(string $transcription): array
         'summary' => 'Réunion de suivi du projet MindScribe AI. L\'équipe a fait le point sur les avancements techniques et les prochaines échéances. Les responsabilités ont été clairement définies entre les membres.',
         'decisions' => [
             'Livraison de la version 1 fixée à la semaine prochaine',
-            'Budget alloué validé à 5000 euros',
+            'Budget alloué validé à 500000 FCFA',
             'Réunion de suivi prévue chaque vendredi',
         ],
         'tasks' => [
-            ['assignee' => 'AKA', 'action' => 'Finaliser le développement backend avant vendredi'],
-            ['assignee' => 'Wilson', 'action' => 'Livrer les maquettes finales du design'],
+            ['assignee' => 'Le chef Moïse', 'action' => 'Finaliser le développement backend avant vendredi'],
+            ['assignee' => 'Hans', 'action' => 'Livrer les maquettes finales du design'],
             ['assignee' => 'Toute l\'équipe', 'action' => 'Préparer la démonstration de la version 1'],
         ],
     ];

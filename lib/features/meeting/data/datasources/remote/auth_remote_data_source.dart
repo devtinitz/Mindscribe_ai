@@ -18,6 +18,10 @@ abstract class AuthRemoteDataSource {
   Future<void> logout();
 
   Future<UserModel?> getCurrentUser();
+
+  Future<void> sendTwoFactorCode();
+
+  Future<bool> verifyTwoFactorCode(String code);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -100,5 +104,23 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
     await _prefs.remove(_tokenKey);
     _dio.options.headers.remove('Authorization');
+  }
+
+  @override
+  Future<void> sendTwoFactorCode() async {
+    await _dio.post<void>('/auth/send-code');
+  }
+
+  @override
+  Future<bool> verifyTwoFactorCode(String code) async {
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        '/auth/verify-code',
+        data: {'code': code},
+      );
+      return response.data?['verified'] == true;
+    } on DioException {
+      return false;
+    }
   }
 }
