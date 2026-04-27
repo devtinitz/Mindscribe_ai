@@ -25,12 +25,14 @@ class AuthController extends GetxController {
   final SendTwoFactorCode _sendTwoFactorCode;
   final VerifyTwoFactorCode _verifyTwoFactorCode;
 
+  // ── Controllers de formulaires ────────────────────────────────────
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
   final twoFactorController = TextEditingController();
 
+  // ── État ──────────────────────────────────────────────────────────
   final isLoading = false.obs;
   final isVerifying = false.obs;
   final errorMessage = RxnString();
@@ -171,26 +173,26 @@ class AuthController extends GetxController {
 
   // ── Déconnexion ───────────────────────────────────────────────────
   Future<void> logout() async {
+    // 1. Reset état
+    currentUser.value = null;
+    errorMessage.value = null;
+    twoFactorError.value = null;
+
+    // 2. Clear les champs
+    emailController.clear();
+    passwordController.clear();
+    nameController.clear();
+    confirmPasswordController.clear();
+    twoFactorController.clear();
+
+    // 3. Appel serveur
     try {
       await _logoutUser();
-    } finally {
-      currentUser.value = null;
-      nameController.clear();
-      emailController.clear();
-      passwordController.clear();
-      confirmPasswordController.clear();
-      twoFactorController.clear();
-      Get.offAllNamed(AppRoutes.login);
-    }
-  }
+    } catch (_) {}
 
-  @override
-  void onClose() {
-    nameController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
-    confirmPasswordController.dispose();
-    twoFactorController.dispose();
-    super.onClose();
+    // 4. Navigation après le frame suivant
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Get.offAllNamed(AppRoutes.login);
+    });
   }
 }
