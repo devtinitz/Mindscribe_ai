@@ -64,7 +64,36 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// ─── Fond animé global avec 20 bulles ────────────────────────────────────────
+// ─── Bulle avec position et vitesse indépendantes ────────────────────────────
+
+class _BubbleData {
+  double x, y;         // position actuelle (0.0 à 1.0)
+  double vx, vy;       // vitesse (direction libre)
+  final double radius; // rayon relatif
+  final Color color;
+
+  _BubbleData({
+    required this.x,
+    required this.y,
+    required this.vx,
+    required this.vy,
+    required this.radius,
+    required this.color,
+  });
+
+  void update(double dt) {
+    x += vx * dt;
+    y += vy * dt;
+
+    // Rebond sur les bords
+    if (x < 0) { x = 0; vx = vx.abs(); }
+    if (x > 1) { x = 1; vx = -vx.abs(); }
+    if (y < 0) { y = 0; vy = vy.abs(); }
+    if (y > 1) { y = 1; vy = -vy.abs(); }
+  }
+}
+
+// ─── Fond animé global ────────────────────────────────────────────────────────
 
 class _GlobalAnimatedBackground extends StatefulWidget {
   const _GlobalAnimatedBackground();
@@ -75,139 +104,116 @@ class _GlobalAnimatedBackground extends StatefulWidget {
 }
 
 class _GlobalAnimatedBackgroundState extends State<_GlobalAnimatedBackground>
-    with TickerProviderStateMixin {
-  late final List<AnimationController> _controllers;
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final List<_BubbleData> _bubbles;
+  double _lastTime = 0;
+
+  static const _colors = [
+    Color(0xFF00004D), // bleu nuit
+    Color(0xFF4F6FFF), // bleu électrique
+    Color(0xFF00C9A7), // mint
+    Color(0xFF7B5EA7), // violet
+    Color(0xFF1A1AAD), // bleu glow
+    Color(0xFFE8A838), // or
+  ];
 
   @override
   void initState() {
     super.initState();
-    _controllers = List.generate(6, (i) {
-      final durations = [10, 13, 8, 16, 11, 14];
-      return AnimationController(
-        vsync: this,
-        duration: Duration(seconds: durations[i]),
-      )..repeat(reverse: true);
+    final rng = math.Random(42);
+
+    // 10 bulles avec positions et vitesses aléatoires
+    _bubbles = List.generate(10, (i) {
+      final color = _colors[i % _colors.length];
+      // Vitesses variées dans toutes les directions
+      final angle = rng.nextDouble() * math.pi * 2;
+      final speed = 0.01 + rng.nextDouble() * 0.03; // vitesse variable
+      return _BubbleData(
+        x: rng.nextDouble(),
+        y: rng.nextDouble(),
+        vx: math.cos(angle) * speed,
+        vy: math.sin(angle) * speed,
+        radius: 0.012 + rng.nextDouble() * 0.02, // taille variée petite
+        color: color.withOpacity(0.35 + rng.nextDouble() * 0.25),
+      );
     });
+
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    )..addListener(_onTick)..repeat();
+  }
+
+  void _onTick() {
+    final t = _ctrl.lastElapsedDuration?.inMilliseconds.toDouble() ?? 0;
+    final dt = (t - _lastTime) / 1000.0;
+    _lastTime = t;
+    if (dt > 0 && dt < 0.1) {
+      for (final b in _bubbles) b.update(dt);
+      setState(() {});
+    }
   }
 
   @override
   void dispose() {
-    for (final c in _controllers) c.dispose();
+    _ctrl.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: Listenable.merge(_controllers),
-      builder: (_, __) => CustomPaint(
-        size: MediaQuery.of(context).size,
-        painter: _GlobalBgPainter(
-          ts: _controllers.map((c) => c.value).toList(),
-        ),
-      ),
+    return CustomPaint(
+      size: MediaQuery.of(context).size,
+      painter: _BubblePainter(bubbles: _bubbles),
     );
   }
 }
 
-class _GlobalBgPainter extends CustomPainter {
-  final List<double> ts;
-
-  _GlobalBgPainter({required this.ts});
+class _BubblePainter extends CustomPainter {
+  final List<_BubbleData> bubbles;
+  _BubblePainter({required this.bubbles});
 
   @override
   void paint(Canvas canvas, Size size) {
     final w = size.width;
     final h = size.height;
 
-    // ── Fond blanc de base ─────────────────────────────────────────
+    // Fond blanc
     canvas.drawRect(
       Rect.fromLTWH(0, 0, w, h),
       Paint()..color = Colors.white,
     );
 
-    final t0 = ts[0];
-    final t1 = ts[1];
-    final t2 = ts[2];
-    final t3 = ts[3];
-    final t4 = ts[4];
-    final t5 = ts[5];
-
-    // ── 20 bulles grosses et visibles ─────────────────────────────
-    final bubbles = [
-      // Bleu nuit — grandes
-      _Bubble(cx: w * 0.85 + math.sin(t0 * math.pi * 2) * w * 0.08, cy: h * 0.1 + math.cos(t0 * math.pi * 2) * h * 0.06, r: w * 0.45, color: const Color(0xFF00004D).withOpacity(0.12)),
-      _Bubble(cx: w * 0.1 + math.sin(t1 * math.pi * 2) * w * 0.07, cy: h * 0.5 + math.cos(t1 * math.pi * 2) * h * 0.08, r: w * 0.42, color: const Color(0xFF00004D).withOpacity(0.1)),
-
-      // Bleu électrique
-      _Bubble(cx: w * 0.7 + math.sin(t2 * math.pi * 2) * w * 0.09, cy: h * 0.8 + math.cos(t2 * math.pi * 2) * h * 0.06, r: w * 0.4, color: const Color(0xFF4F6FFF).withOpacity(0.13)),
-      _Bubble(cx: w * 0.2 + math.sin(t3 * math.pi * 2) * w * 0.06, cy: h * 0.2 + math.cos(t3 * math.pi * 2) * h * 0.07, r: w * 0.38, color: const Color(0xFF4F6FFF).withOpacity(0.11)),
-      _Bubble(cx: w * 0.5 + math.sin(t4 * math.pi * 2) * w * 0.1, cy: h * 0.35 + math.cos(t4 * math.pi * 2) * h * 0.09, r: w * 0.3, color: const Color(0xFF4F6FFF).withOpacity(0.09)),
-
-      // Mint / turquoise
-      _Bubble(cx: w * 0.8 + math.sin(t5 * math.pi * 2) * w * 0.07, cy: h * 0.55 + math.cos(t5 * math.pi * 2) * h * 0.08, r: w * 0.36, color: const Color(0xFF00C9A7).withOpacity(0.12)),
-      _Bubble(cx: w * 0.15 + math.sin(t0 * math.pi * 3) * w * 0.08, cy: h * 0.85 + math.cos(t0 * math.pi * 3) * h * 0.05, r: w * 0.32, color: const Color(0xFF00C9A7).withOpacity(0.1)),
-      _Bubble(cx: w * 0.6 + math.sin(t1 * math.pi * 3) * w * 0.06, cy: h * 0.65 + math.cos(t1 * math.pi * 3) * h * 0.07, r: w * 0.28, color: const Color(0xFF00C9A7).withOpacity(0.09)),
-
-      // Violet
-      _Bubble(cx: w * 0.35 + math.sin(t2 * math.pi * 2.5) * w * 0.09, cy: h * 0.4 + math.cos(t2 * math.pi * 2.5) * h * 0.08, r: w * 0.34, color: const Color(0xFF7B5EA7).withOpacity(0.1)),
-      _Bubble(cx: w * 0.9 + math.sin(t3 * math.pi * 2.5) * w * 0.06, cy: h * 0.3 + math.cos(t3 * math.pi * 2.5) * h * 0.06, r: w * 0.3, color: const Color(0xFF7B5EA7).withOpacity(0.09)),
-      _Bubble(cx: w * 0.05 + math.sin(t4 * math.pi * 2.5) * w * 0.07, cy: h * 0.7 + math.cos(t4 * math.pi * 2.5) * h * 0.06, r: w * 0.26, color: const Color(0xFF7B5EA7).withOpacity(0.08)),
-
-      // Bleu glow
-      _Bubble(cx: w * 0.45 + math.sin(t5 * math.pi * 3) * w * 0.08, cy: h * 0.9 + math.cos(t5 * math.pi * 3) * h * 0.05, r: w * 0.32, color: const Color(0xFF1A1AAD).withOpacity(0.1)),
-      _Bubble(cx: w * 0.75 + math.sin(t0 * math.pi * 3.5) * w * 0.07, cy: h * 0.42 + math.cos(t0 * math.pi * 3.5) * h * 0.07, r: w * 0.28, color: const Color(0xFF1A1AAD).withOpacity(0.09)),
-
-      // Or doux
-      _Bubble(cx: w * 0.25 + math.sin(t1 * math.pi * 3) * w * 0.08, cy: h * 0.6 + math.cos(t1 * math.pi * 3) * h * 0.07, r: w * 0.3, color: const Color(0xFFE8A838).withOpacity(0.08)),
-      _Bubble(cx: w * 0.6 + math.sin(t2 * math.pi * 3.5) * w * 0.06, cy: h * 0.15 + math.cos(t2 * math.pi * 3.5) * h * 0.06, r: w * 0.25, color: const Color(0xFFE8A838).withOpacity(0.07)),
-
-      // Petites bulles dynamiques
-      _Bubble(cx: w * 0.5 + math.sin(t3 * math.pi * 4) * w * 0.12, cy: h * 0.5 + math.cos(t3 * math.pi * 4) * h * 0.1, r: w * 0.18, color: const Color(0xFF4F6FFF).withOpacity(0.15)),
-      _Bubble(cx: w * 0.3 + math.sin(t4 * math.pi * 4) * w * 0.1, cy: h * 0.25 + math.cos(t4 * math.pi * 4) * h * 0.09, r: w * 0.16, color: const Color(0xFF00C9A7).withOpacity(0.14)),
-      _Bubble(cx: w * 0.8 + math.sin(t5 * math.pi * 4) * w * 0.09, cy: h * 0.75 + math.cos(t5 * math.pi * 4) * h * 0.08, r: w * 0.15, color: const Color(0xFF00004D).withOpacity(0.13)),
-      _Bubble(cx: w * 0.15 + math.sin(t0 * math.pi * 5) * w * 0.08, cy: h * 0.45 + math.cos(t0 * math.pi * 5) * h * 0.07, r: w * 0.14, color: const Color(0xFF7B5EA7).withOpacity(0.14)),
-      _Bubble(cx: w * 0.65 + math.sin(t1 * math.pi * 5) * w * 0.07, cy: h * 0.05 + math.cos(t1 * math.pi * 5) * h * 0.06, r: w * 0.13, color: const Color(0xFF1A1AAD).withOpacity(0.13)),
-    ];
-
-    for (final b in bubbles) {
-      _drawBlob(canvas, cx: b.cx, cy: b.cy, r: b.r, color: b.color);
-    }
-
-    // ── Grille subtile ────────────────────────────────────────────
+    // Grille subtile
     final gridPaint = Paint()
-      ..color = const Color(0xFF00004D).withOpacity(0.03)
+      ..color = const Color(0xFF00004D).withOpacity(0.04)
       ..strokeWidth = 0.8;
-
     for (int i = 0; i <= 10; i++) {
-      final x = w / 10 * i;
-      canvas.drawLine(Offset(x, 0), Offset(x, h), gridPaint);
+      canvas.drawLine(Offset(w / 10 * i, 0), Offset(w / 10 * i, h), gridPaint);
     }
     for (int i = 0; i <= 18; i++) {
-      final y = h / 18 * i;
-      canvas.drawLine(Offset(0, y), Offset(w, y), gridPaint);
+      canvas.drawLine(Offset(0, h / 18 * i), Offset(w, h / 18 * i), gridPaint);
     }
-  }
 
-  void _drawBlob(Canvas canvas, {
-    required double cx,
-    required double cy,
-    required double r,
-    required Color color,
-  }) {
-    final paint = Paint()
-      ..shader = RadialGradient(
-        colors: [color, color.withOpacity(0)],
-      ).createShader(Rect.fromCircle(center: Offset(cx, cy), radius: r));
-    canvas.drawCircle(Offset(cx, cy), r, paint);
+    // Dessiner les bulles
+    for (final b in bubbles) {
+      final cx = b.x * w;
+      final cy = b.y * h;
+      final r = b.radius * w;
+
+      // Cercle solide
+      canvas.drawCircle(Offset(cx, cy), r, Paint()..color = b.color);
+
+      // Petit reflet blanc en haut à gauche
+      canvas.drawCircle(
+        Offset(cx - r * 0.3, cy - r * 0.3),
+        r * 0.25,
+        Paint()..color = Colors.white.withOpacity(0.4),
+      );
+    }
   }
 
   @override
-  bool shouldRepaint(_GlobalBgPainter old) => true;
-}
-
-class _Bubble {
-  final double cx, cy, r;
-  final Color color;
-  const _Bubble({required this.cx, required this.cy, required this.r, required this.color});
+  bool shouldRepaint(_BubblePainter old) => true;
 }
