@@ -1,9 +1,12 @@
 import 'package:get/get.dart';
 
 import '../bindings/meeting_binding.dart';
+import '../pages/splash_page.dart';
 import '../pages/login_page.dart';
 import '../pages/register_page.dart';
 import '../pages/two_factor_page.dart';
+import '../pages/forgot_password_page.dart';
+import '../pages/reset_password_page.dart';
 import '../pages/dashboard_page.dart';
 import '../pages/meeting_detail_page.dart';
 import '../pages/meetings_page.dart';
@@ -12,6 +15,11 @@ import 'app_routes.dart';
 
 abstract class AppPages {
   static final pages = <GetPage<dynamic>>[
+    GetPage(
+      name: AppRoutes.splash,
+      page: () => const SplashPage(),
+      binding: MeetingBinding(),
+    ),
     GetPage(
       name: AppRoutes.login,
       page: () => const LoginPage(),
@@ -25,6 +33,16 @@ abstract class AppPages {
     GetPage(
       name: AppRoutes.twoFactor,
       page: () => const TwoFactorPage(),
+      binding: MeetingBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.forgotPassword,
+      page: () => const ForgotPasswordPage(),
+      binding: MeetingBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.resetPassword,
+      page: () => const ResetPasswordPage(),
       binding: MeetingBinding(),
     ),
     GetPage(

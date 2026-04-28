@@ -4,10 +4,13 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AudioController;
 use App\Http\Controllers\TwoFactorController;
+use App\Http\Controllers\PasswordResetController;
 
 // Routes publiques
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/forgot-password', [PasswordResetController::class, 'sendResetLink']);
+Route::post('/auth/reset-password', [PasswordResetController::class, 'resetPassword']);
 
 // Routes protégées
 Route::middleware('auth:sanctum')->group(function () {

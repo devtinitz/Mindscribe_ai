@@ -49,7 +49,8 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      initialRoute: AppRoutes.login,
+      // ── Le splash screen est la première page ──
+      initialRoute: AppRoutes.splash,
       getPages: AppPages.pages,
     );
   }

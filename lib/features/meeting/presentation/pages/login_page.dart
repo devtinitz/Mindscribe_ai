@@ -99,11 +99,11 @@ class LoginPage extends GetView<AuthController> {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _Tag(text: "Capturer", color: AppColors.accent),
+            _Tag(text: "Capture", color: AppColors.accent),
             const SizedBox(width: 6),
-            _Tag(text: "Transcrire", color: AppColors.accentMint),
+            _Tag(text: "Transcription", color: AppColors.accentMint),
             const SizedBox(width: 6),
-            _Tag(text: "Décider", color: AppColors.accentViolet),
+            _Tag(text: "Décision", color: AppColors.accentViolet),
           ],
         ).animate(delay: 300.ms).fadeIn().slideY(begin: 0.3),
       ],
@@ -278,7 +278,7 @@ class LoginPage extends GetView<AuthController> {
           // Mot de passe oublié
           Center(
             child: TextButton(
-              onPressed: () {},
+              onPressed: () => Get.toNamed(AppRoutes.forgotPassword),
               style: TextButton.styleFrom(
                 foregroundColor: AppColors.accent,
               ),

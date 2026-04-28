@@ -28,6 +28,7 @@ import '../../domain/usecases/upload_meeting_audio.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/meetings_controller.dart';
 import '../controllers/recorder_controller.dart';
+import '../interceptors/auth_interceptor.dart';
 
 class MeetingBinding extends Bindings {
   static String get _baseUrl {
@@ -46,16 +47,19 @@ class MeetingBinding extends Bindings {
 
   @override
   void dependencies() {
-    _lazyPutIfAbsent<Dio>(
-      () => Dio(
+    _lazyPutIfAbsent<Dio>(() {
+      final dio = Dio(
         BaseOptions(
           baseUrl: _baseUrl,
           connectTimeout: const Duration(seconds: 20),
           receiveTimeout: const Duration(minutes: 2),
           sendTimeout: const Duration(minutes: 2),
         ),
-      ),
-    );
+      );
+      // ── Intercepteur de session expirée ──
+      dio.interceptors.add(AuthInterceptor());
+      return dio;
+    });
 
     _lazyPutIfAbsent<AudioRecorder>(AudioRecorder.new);
     _lazyPutIfAbsent<SharedPreferences>(() => Get.find<SharedPreferences>());

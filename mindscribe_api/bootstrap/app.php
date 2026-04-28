@@ -17,5 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(prepend: [HandleCors::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, $request) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Non authentifié.'], 401);
+            }
+        });
+    
     })->create();
