@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
-import '../controllers/auth_controller.dart';
 import '../controllers/recorder_controller.dart';
-import '../routes/app_routes.dart';
 import '../theme/app_colors.dart';
+import '../widgets/app_sidebar.dart';
 
 class RecordingPage extends GetView<RecorderController> {
   const RecordingPage({super.key});
@@ -16,6 +15,7 @@ class RecordingPage extends GetView<RecorderController> {
     final size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: AppColors.background,
+      drawer: const AppSidebar(),
       body: Stack(
         children: [
           const _AnimatedBackground(),
@@ -34,12 +34,34 @@ class RecordingPage extends GetView<RecorderController> {
 
   // ── AppBar ────────────────────────────────────────────────────────
   Widget _buildAppBar(BuildContext context) {
-    final authController = Get.find<AuthController>();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         children: [
-          const SizedBox(width: 40),
+          // ── Bouton sidebar à gauche ──
+          Builder(
+            builder: (ctx) => GestureDetector(
+              onTap: () => Scaffold.of(ctx).openDrawer(),
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.border),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withOpacity(0.06),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Icon(Icons.menu_rounded,
+                    size: 20, color: AppColors.primary),
+              ),
+            ),
+          ),
           const Expanded(
             child: Text(
               "Nouvelle Réunion",
@@ -51,93 +73,7 @@ class RecordingPage extends GetView<RecorderController> {
               ),
             ),
           ),
-          PopupMenuButton<String>(
-            icon: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.border),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withOpacity(0.06),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: const Icon(Icons.menu_rounded,
-                  size: 20, color: AppColors.primary),
-            ),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16)),
-            elevation: 8,
-            shadowColor: AppColors.primary.withOpacity(0.15),
-            offset: const Offset(0, 50),
-            onSelected: (value) {
-              if (value == 'meetings') {
-                Get.toNamed(AppRoutes.meetings);
-              } else if (value == 'logout') {
-                authController.logout();
-              }
-            },
-            itemBuilder: (_) => [
-              PopupMenuItem<String>(
-                value: 'meetings',
-                child: Row(
-                  children: [
-                    Container(
-                      width: 34,
-                      height: 34,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(Icons.mic_rounded,
-                          size: 18, color: AppColors.primary),
-                    ),
-                    const SizedBox(width: 12),
-                    const Text(
-                      'Mes réunions',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                        color: AppColors.text,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const PopupMenuDivider(height: 1),
-              PopupMenuItem<String>(
-                value: 'logout',
-                child: Row(
-                  children: [
-                    Container(
-                      width: 34,
-                      height: 34,
-                      decoration: BoxDecoration(
-                        color: AppColors.danger.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(Icons.logout_rounded,
-                          size: 18, color: AppColors.danger),
-                    ),
-                    const SizedBox(width: 12),
-                    const Text(
-                      'Déconnexion',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                        color: AppColors.danger,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+          const SizedBox(width: 40),
         ],
       ),
     );
