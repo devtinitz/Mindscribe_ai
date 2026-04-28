@@ -22,10 +22,10 @@ class DashboardPage extends StatelessWidget {
     final monthName = months[now.month - 1];
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.transparent,
       drawer: const AppSidebar(),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.white.withOpacity(0.85),
         elevation: 0,
         leading: Builder(
           builder: (ctx) => Padding(

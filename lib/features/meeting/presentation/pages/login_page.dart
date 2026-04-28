@@ -16,12 +16,9 @@ class LoginPage extends GetView<AuthController> {
     final isSmall = size.width < 360;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          // ── Fond animé ────────────────────────────────────────────
-          const _AnimatedBackground(),
-
           // ── Contenu principal ─────────────────────────────────────
           SafeArea(
             child: Center(

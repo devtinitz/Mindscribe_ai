@@ -34,7 +34,7 @@ class MeetingBinding extends Bindings {
   static String get _baseUrl {
     if (kIsWeb) return 'http://localhost:8000/api';
     if (defaultTargetPlatform == TargetPlatform.android) {
-      return 'http://192.168.1.27:8000/api';
+      return 'http://192.168.1.23:8000/api';
     }
     return 'http://localhost:8000/api';
   }

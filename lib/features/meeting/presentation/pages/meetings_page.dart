@@ -40,10 +40,10 @@ class MeetingsPage extends GetView<MeetingsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.transparent,
       drawer: const AppSidebar(),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         foregroundColor: AppColors.primary,
         elevation: 0,
         leading: Builder(

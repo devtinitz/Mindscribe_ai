@@ -14,9 +14,7 @@ class RegisterPage extends GetView<AuthController> {
       backgroundColor: AppColors.background,
       body: Stack(
         children: [
-          // Fond
           _buildBackground(),
-
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 28),
@@ -43,7 +41,6 @@ class RegisterPage extends GetView<AuthController> {
 
                   const SizedBox(height: 32),
 
-                  // Titre
                   const Text(
                     'Créer un compte',
                     style: TextStyle(
@@ -65,7 +62,21 @@ class RegisterPage extends GetView<AuthController> {
                   const SizedBox(height: 36),
 
                   // ── Formulaire ──
-                  _buildCard(
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: AppColors.border),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withOpacity(0.06),
+                          blurRadius: 24,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
                     child: Column(
                       children: [
                         // Nom
@@ -89,24 +100,18 @@ class RegisterPage extends GetView<AuthController> {
 
                         const SizedBox(height: 16),
 
-                        // Mot de passe
-                        _buildField(
+                        // Mot de passe avec toggle
+                        _PasswordField(
                           controller: controller.passwordController,
                           label: 'Mot de passe',
-                          hint: '••••••••',
-                          icon: Icons.lock_outline_rounded,
-                          obscure: true,
                         ),
 
                         const SizedBox(height: 16),
 
-                        // Confirmation
-                        _buildField(
+                        // Confirmation avec toggle
+                        _PasswordField(
                           controller: controller.confirmPasswordController,
                           label: 'Confirmer le mot de passe',
-                          hint: '••••••••',
-                          icon: Icons.lock_outline_rounded,
-                          obscure: true,
                         ),
 
                         const SizedBox(height: 24),
@@ -206,32 +211,11 @@ class RegisterPage extends GetView<AuthController> {
     );
   }
 
-  Widget _buildCard({required Widget child}) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.06),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: child,
-    );
-  }
-
   Widget _buildField({
     required TextEditingController controller,
     required String label,
     required String hint,
     required IconData icon,
-    bool obscure = false,
     TextInputType? keyboardType,
   }) {
     return Column(
@@ -248,7 +232,6 @@ class RegisterPage extends GetView<AuthController> {
         const SizedBox(height: 8),
         TextField(
           controller: controller,
-          obscureText: obscure,
           keyboardType: keyboardType,
           decoration: InputDecoration(
             hintText: hint,
@@ -257,16 +240,15 @@ class RegisterPage extends GetView<AuthController> {
             fillColor: AppColors.background,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: AppColors.border),
+              borderSide: const BorderSide(color: AppColors.border),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: AppColors.border),
+              borderSide: const BorderSide(color: AppColors.border),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide:
-                  BorderSide(color: AppColors.primary, width: 1.5),
+              borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
             ),
           ),
         ),
@@ -286,6 +268,77 @@ class RegisterPage extends GetView<AuthController> {
           color: AppColors.primary.withOpacity(0.05),
         ),
       ),
+    );
+  }
+}
+
+// ─── Champ mot de passe avec toggle ──────────────────────────────────────────
+
+class _PasswordField extends StatefulWidget {
+  final TextEditingController controller;
+  final String label;
+
+  const _PasswordField({
+    required this.controller,
+    required this.label,
+  });
+
+  @override
+  State<_PasswordField> createState() => _PasswordFieldState();
+}
+
+class _PasswordFieldState extends State<_PasswordField> {
+  bool _obscure = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          widget.label,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: AppColors.text,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: widget.controller,
+          obscureText: _obscure,
+          decoration: InputDecoration(
+            hintText: '••••••••',
+            prefixIcon: const Icon(Icons.lock_outline_rounded,
+                size: 18, color: AppColors.hint),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscure
+                    ? Icons.visibility_off_outlined
+                    : Icons.visibility_outlined,
+                size: 20,
+                color: AppColors.hint,
+              ),
+              onPressed: () => setState(() => _obscure = !_obscure),
+            ),
+            filled: true,
+            fillColor: AppColors.background,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: AppColors.border),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: AppColors.border),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide:
+                  const BorderSide(color: AppColors.primary, width: 1.5),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

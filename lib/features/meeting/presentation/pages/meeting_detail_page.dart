@@ -20,10 +20,10 @@ class MeetingDetailPage extends GetView<MeetingsController> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('Compte-rendu'),
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         foregroundColor: AppColors.primary,
         elevation: 0,
         actions: [

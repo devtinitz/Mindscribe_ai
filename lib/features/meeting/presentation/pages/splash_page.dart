@@ -107,15 +107,6 @@ class _SplashPageState extends State<SplashPage>
     return Scaffold(
       body: Stack(
         children: [
-          // ── Fond animé ──────────────────────────────────────────
-          AnimatedBuilder(
-            animation: _bgCtrl,
-            builder: (_, __) => CustomPaint(
-              size: size,
-              painter: _SplashBgPainter(t: _bgCtrl.value),
-            ),
-          ),
-
           // ── Contenu centré ──────────────────────────────────────
           Center(
             child: Column(
