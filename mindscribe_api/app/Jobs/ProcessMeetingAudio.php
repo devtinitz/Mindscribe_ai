@@ -79,7 +79,7 @@ class ProcessMeetingAudio implements ShouldQueue
     }
 
     // ── Whisper ───────────────────────────────────────────────────────
-    /* private function transcribeWithWhisper(string $audioPath): string
+    private function transcribeWithWhisper(string $audioPath): string
     {
         $response = Http::withToken(config('services.openai.key'))
             ->withoutVerifying()
@@ -133,9 +133,9 @@ PROMPT;
 
         $content = $response->json('choices.0.message.content', '{}');
         return json_decode($content, true) ?? [];
-    } */
+    }
 
-    private function transcribeWithWhisper(string $audioPath): string
+    /* private function transcribeWithWhisper(string $audioPath): string
 {
     // Mode simulation — pas besoin d'OpenAI
     return "C'est une transcription simulée de la réunion.  
@@ -162,5 +162,5 @@ private function analyzeWithGPT(string $transcription): array
             ['assignee' => 'Toute l\'équipe', 'action' => 'Préparer la démonstration de la version 1'],
         ],
     ];
-}
+} */
 }

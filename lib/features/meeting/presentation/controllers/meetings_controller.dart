@@ -116,7 +116,7 @@ class MeetingsController extends GetxController {
   @override
   void onClose() {
     isPolling.value = false;
-    queryController.dispose();
+    
     super.onClose();
   }
 }

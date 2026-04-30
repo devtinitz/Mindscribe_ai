@@ -8,6 +8,7 @@ import '../../domain/usecases/get_meetings.dart';
 import '../../domain/usecases/start_recording.dart';
 import '../../domain/usecases/stop_recording.dart';
 import '../../domain/usecases/upload_meeting_audio.dart';
+import '../controllers/meetings_controller.dart';
 import '../routes/app_routes.dart';
 
 class RecorderController extends GetxController {
@@ -152,6 +153,11 @@ class RecorderController extends GetxController {
       uploadedMeeting.value = meeting;
       status.value = 'Audio envoyé !';
       hasRecorded.value = false;
+
+      // Charge le détail et démarre le polling
+      final meetingsController = Get.find<MeetingsController>();
+      await meetingsController.loadMeetingDetail(meeting.id ?? 0);
+      await meetingsController.loadMeetings();
 
       Get.toNamed(AppRoutes.meetingDetail, arguments: meeting.id);
     } catch (e) {

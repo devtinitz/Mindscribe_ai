@@ -34,7 +34,7 @@ class MeetingBinding extends Bindings {
   static String get _baseUrl {
     if (kIsWeb) return 'http://localhost:8000/api';
     if (defaultTargetPlatform == TargetPlatform.android) {
-      return 'http://192.168.1.23:8000/api';
+      return 'http://192.168.1.4:8000/api';
     }
     return 'http://localhost:8000/api';
   }
@@ -51,9 +51,9 @@ class MeetingBinding extends Bindings {
       final dio = Dio(
         BaseOptions(
           baseUrl: _baseUrl,
-          connectTimeout: const Duration(seconds: 20),
-          receiveTimeout: const Duration(minutes: 2),
-          sendTimeout: const Duration(minutes: 2),
+          connectTimeout: const Duration(seconds: 30),
+          receiveTimeout: const Duration(minutes: 3),
+          sendTimeout: const Duration(minutes: 3),
         ),
       );
       // ── Intercepteur de session expirée ──

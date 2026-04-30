@@ -83,6 +83,12 @@ class RecordingPage extends GetView<RecorderController> {
   Widget _buildBody(Size size) {
     final isRecording = controller.isRecording.value;
     final isUploading = controller.isUploading.value;
+    final hasRecorded = controller.hasRecorded.value;
+
+    // ── Phase 2 : lecteur + boutons valider/réenregistrer ──────────
+    if (hasRecorded && !isUploading) {
+      return _buildPlayerView(size);
+    }
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -139,6 +145,168 @@ class RecordingPage extends GetView<RecorderController> {
         _buildBottomSection(),
       ],
     );
+  }
+
+  // ── Phase 2 : lecteur audio + valider ────────────────────────────
+  Widget _buildPlayerView(Size size) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Titre
+          const Text(
+            'Enregistrement terminé',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: AppColors.primary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Écoutez votre enregistrement avant de valider',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+          ),
+
+          const SizedBox(height: 40),
+
+          // Icône micro
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: AppColors.success.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.check_rounded,
+                color: AppColors.success, size: 40),
+          ),
+
+          const SizedBox(height: 32),
+
+          // Barre de progression
+          Obx(() {
+            final pos = controller.playbackPosition.value;
+            final dur = controller.playbackDuration.value;
+            final progress = dur.inMilliseconds > 0
+                ? pos.inMilliseconds / dur.inMilliseconds
+                : 0.0;
+
+            return Column(
+              children: [
+                SliderTheme(
+                  data: SliderTheme.of(Get.context!).copyWith(
+                    activeTrackColor: AppColors.primary,
+                    inactiveTrackColor: AppColors.border,
+                    thumbColor: AppColors.primary,
+                    trackHeight: 4,
+                  ),
+                  child: Slider(
+                    value: progress.clamp(0.0, 1.0),
+                    onChanged: (v) {
+                      final ms = (v * dur.inMilliseconds).toInt();
+                      controller.seekTo(Duration(milliseconds: ms));
+                    },
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(_formatDuration(pos),
+                        style: TextStyle(
+                            fontSize: 11, color: AppColors.textSecondary)),
+                    Text(_formatDuration(dur),
+                        style: TextStyle(
+                            fontSize: 11, color: AppColors.textSecondary)),
+                  ],
+                ),
+              ],
+            );
+          }),
+
+          const SizedBox(height: 16),
+
+          // Bouton play/pause
+          Obx(() => GestureDetector(
+                onTap: controller.togglePlayback,
+                child: Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.3),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    controller.isPlaying.value
+                        ? Icons.pause_rounded
+                        : Icons.play_arrow_rounded,
+                    color: Colors.white,
+                    size: 32,
+                  ),
+                ),
+              )),
+
+          const SizedBox(height: 40),
+
+          // Boutons Réenregistrer / Valider
+          Row(
+            children: [
+              // Réenregistrer
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: controller.retake,
+                  icon: const Icon(Icons.refresh_rounded, size: 18),
+                  label: const Text('Réenregistrer'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    side: const BorderSide(color: AppColors.primary),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Valider → upload
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: controller.validateAndUpload,
+                  icon: const Icon(Icons.send_rounded,
+                      size: 18, color: Colors.white),
+                  label: const Text(
+                    'Valider',
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.w700),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDuration(Duration d) {
+    final m = d.inMinutes.toString().padLeft(2, '0');
+    final s = (d.inSeconds % 60).toString().padLeft(2, '0');
+    return '$m:$s';
   }
 
   // ── Barre de statut ───────────────────────────────────────────────

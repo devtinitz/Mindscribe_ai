@@ -37,6 +37,9 @@ dependencies:
   # ✨ Animations
   flutter_animate: ^4.5.0
 
+  # 📊 Graphiques
+  fl_chart: ^0.69.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

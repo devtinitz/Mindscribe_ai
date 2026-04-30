@@ -1,3 +1,4 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -14,7 +15,6 @@ class DashboardPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final authController = Get.find<AuthController>();
     final meetingsController = Get.find<MeetingsController>();
-    final user = authController.currentUser.value;
     final now = DateTime.now();
     final days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
     final months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
@@ -57,11 +57,46 @@ class DashboardPage extends StatelessWidget {
         centerTitle: true,
       ),
       body: Obx(() {
+        final user = authController.currentUser.value;
         final meetings = meetingsController.meetings;
         final total = meetings.length;
         final done = meetings.where((m) => m.status == 'done').length;
-        final pending = meetings.where((m) => m.status == 'pending' || m.status == 'processing').length;
+        final pending = meetings.where((m) =>
+            m.status == 'pending' || m.status == 'processing').length;
         final recent = meetings.take(3).toList();
+
+        // ── Tâches en attente ──────────────────────────────────────
+        final pendingTasks = <Map<String, String>>[];
+        for (final m in meetings) {
+          if (m.tasks != null) {
+            for (final t in m.tasks!) {
+              if (!t.isDone) {
+                pendingTasks.add({
+                  'title': t.action,
+                  'assignee': t.assignee,
+                  'meeting': m.title.isNotEmpty ? m.title : 'Réunion',
+                });
+              }
+            }
+          }
+        }
+
+        // ── Données graphique (7 derniers jours) ───────────────────
+        final weekData = List.generate(7, (i) {
+          final day = now.subtract(Duration(days: 6 - i));
+          final count = meetings.where((m) =>
+            m.createdAt.year == day.year &&
+            m.createdAt.month == day.month &&
+            m.createdAt.day == day.day
+          ).length;
+          return count.toDouble();
+        });
+
+        final weekLabels = List.generate(7, (i) {
+          final day = now.subtract(Duration(days: 6 - i));
+          const d = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+          return d[day.weekday - 1];
+        });
 
         return SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -73,7 +108,7 @@ class DashboardPage extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
+                  gradient: const LinearGradient(
                     colors: [AppColors.primary, AppColors.primaryGlow],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -185,6 +220,230 @@ class DashboardPage extends StatelessWidget {
               ),
 
               const SizedBox(height: 24),
+
+              // ── Graphique 7 jours ──
+              const Text(
+                'Activité cette semaine',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.text,
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppColors.border),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${weekData.reduce((a, b) => a + b).toInt()} réunions sur 7 jours',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      height: 160,
+                      child: BarChart(
+                        BarChartData(
+                          alignment: BarChartAlignment.spaceAround,
+                          maxY: (weekData.reduce((a, b) => a > b ? a : b) + 1)
+                              .clamp(3, double.infinity),
+                          barTouchData: BarTouchData(
+                            enabled: true,
+                            touchTooltipData: BarTouchTooltipData(
+                              getTooltipColor: (_) => AppColors.primary,
+                              getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                                return BarTooltipItem(
+                                  '${rod.toY.toInt()} réunion(s)',
+                                  const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          titlesData: FlTitlesData(
+                            show: true,
+                            bottomTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                getTitlesWidget: (value, meta) {
+                                  final idx = value.toInt();
+                                  if (idx < 0 || idx >= weekLabels.length) {
+                                    return const SizedBox();
+                                  }
+                                  return Padding(
+                                    padding: const EdgeInsets.only(top: 6),
+                                    child: Text(
+                                      weekLabels[idx],
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: AppColors.textSecondary,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            leftTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                reservedSize: 24,
+                                getTitlesWidget: (value, meta) {
+                                  if (value % 1 != 0) return const SizedBox();
+                                  return Text(
+                                    value.toInt().toString(),
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: AppColors.hint,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            topTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false)),
+                            rightTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false)),
+                          ),
+                          gridData: FlGridData(
+                            show: true,
+                            drawVerticalLine: false,
+                            horizontalInterval: 1,
+                            getDrawingHorizontalLine: (_) => FlLine(
+                              color: AppColors.border,
+                              strokeWidth: 1,
+                            ),
+                          ),
+                          borderData: FlBorderData(show: false),
+                          barGroups: List.generate(7, (i) {
+                            final isToday = i == 6;
+                            return BarChartGroupData(
+                              x: i,
+                              barRods: [
+                                BarChartRodData(
+                                  toY: weekData[i] == 0 ? 0.1 : weekData[i],
+                                  color: isToday
+                                      ? AppColors.accent
+                                      : AppColors.primary.withOpacity(0.7),
+                                  width: 22,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ],
+                            );
+                          }),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // ── Tâches en attente ──
+              if (pendingTasks.isNotEmpty) ...[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Tâches en attente',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.text,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.danger.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        '${pendingTasks.length}',
+                        style: const TextStyle(
+                          color: AppColors.danger,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                ...pendingTasks.take(5).map((task) => Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 20,
+                            height: 20,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                  color: AppColors.primary, width: 2),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  task['title'] ?? '',
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.text,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  '${task['assignee']} — ${task['meeting']}',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(Icons.arrow_forward_ios_rounded,
+                              size: 14, color: AppColors.hint),
+                        ],
+                      ),
+                    )),
+                const SizedBox(height: 24),
+              ],
 
               // ── Réunions récentes ──
               Row(
@@ -324,8 +583,7 @@ class DashboardPage extends StatelessWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(statusIcon,
-                                size: 12, color: statusColor),
+                            Icon(statusIcon, size: 12, color: statusColor),
                             const SizedBox(width: 4),
                             Text(
                               statusLabel,
@@ -371,7 +629,7 @@ class _StatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.white.withOpacity(0.9),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
         boxShadow: [
