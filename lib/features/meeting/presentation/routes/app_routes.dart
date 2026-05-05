@@ -9,4 +9,5 @@ abstract class AppRoutes {
   static const recorder = '/recorder';
   static const meetings = '/meetings';
   static const meetingDetail = '/meeting-detail';
+  static const selectParticipants = '/select-participants';
 }

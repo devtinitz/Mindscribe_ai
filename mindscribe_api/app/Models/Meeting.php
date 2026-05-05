@@ -25,4 +25,11 @@ class Meeting extends Model
     {
         return $this->hasMany(Task::class);
     }
+
+    public function participants()
+    {
+    return $this->belongsToMany(TeamMember::class, 'meeting_participants', 'meeting_id', 'team_member_id')
+                ->withPivot('notified_at', 'summary_sent_at')
+                ->withTimestamps();
+    }
 }

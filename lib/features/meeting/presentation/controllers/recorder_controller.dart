@@ -9,6 +9,7 @@ import '../../domain/usecases/start_recording.dart';
 import '../../domain/usecases/stop_recording.dart';
 import '../../domain/usecases/upload_meeting_audio.dart';
 import '../controllers/meetings_controller.dart';
+import '../controllers/participants_controller.dart';
 import '../routes/app_routes.dart';
 
 class RecorderController extends GetxController {
@@ -27,7 +28,6 @@ class RecorderController extends GetxController {
   final UploadMeetingAudio _uploadMeetingAudio;
   final GetMeetings _getMeetings;
 
-  // ── État enregistrement ───────────────────────────────────────────
   final isRecording = false.obs;
   final isUploading = false.obs;
   final status = 'Prêt'.obs;
@@ -36,7 +36,6 @@ class RecorderController extends GetxController {
   final elapsedSeconds = 0.obs;
   Timer? _timer;
 
-  // ── État lecteur audio (Phase 2) ──────────────────────────────────
   final hasRecorded = false.obs;
   final isPlaying = false.obs;
   final playbackPosition = Duration.zero.obs;
@@ -47,12 +46,10 @@ class RecorderController extends GetxController {
   StreamSubscription? _durationSub;
   StreamSubscription? _playerStateSub;
 
-  // ── Démarrer l'enregistrement ─────────────────────────────────────
   Future<void> startRecording() async {
     try {
       await _resetPlayer();
       hasRecorded.value = false;
-
       await _startRecording();
       isRecording.value = true;
       status.value = 'Enregistrement en cours...';
@@ -66,14 +63,12 @@ class RecorderController extends GetxController {
     }
   }
 
-  // ── Arrêter → affiche le lecteur ──────────────────────────────────
   Future<void> stopRecording() async {
     try {
       final path = await _stopRecording();
       recordedFilePath.value = path;
       isRecording.value = false;
       _timer?.cancel();
-
       await _loadAudioForPlayback(path);
       hasRecorded.value = true;
       status.value = 'Enregistrement terminé';
@@ -84,19 +79,15 @@ class RecorderController extends GetxController {
     }
   }
 
-  // ── Lecteur audio ─────────────────────────────────────────────────
   Future<void> _loadAudioForPlayback(String path) async {
     try {
       await _player.setFilePath(path);
-
       _durationSub = _player.durationStream.listen((d) {
         if (d != null) playbackDuration.value = d;
       });
-
       _positionSub = _player.positionStream.listen((p) {
         playbackPosition.value = p;
       });
-
       _playerStateSub = _player.playerStateStream.listen((state) {
         isPlaying.value = state.playing;
         if (state.processingState == ProcessingState.completed) {
@@ -121,7 +112,6 @@ class RecorderController extends GetxController {
     await _player.seek(position);
   }
 
-  // ── Réenregistrer ─────────────────────────────────────────────────
   Future<void> retake() async {
     await _resetPlayer();
     hasRecorded.value = false;
@@ -130,7 +120,6 @@ class RecorderController extends GetxController {
     elapsedSeconds.value = 0;
   }
 
-  // ── Valider et envoyer ────────────────────────────────────────────
   Future<void> validateAndUpload() async {
     final path = recordedFilePath.value;
     if (path == null) return;
@@ -138,10 +127,8 @@ class RecorderController extends GetxController {
     await _uploadRecording(path);
   }
 
-  // ── Upload + redirection ──────────────────────────────────────────
   Future<void> _uploadRecording(String path) async {
     final title = await _buildAutoTitle();
-
     isUploading.value = true;
     status.value = 'Envoi en cours...';
 
@@ -154,12 +141,24 @@ class RecorderController extends GetxController {
       status.value = 'Audio envoyé !';
       hasRecorded.value = false;
 
-      // Charge le détail et démarre le polling
+      // ── Envoie les invitations aux participants sélectionnés ──────
+      try {
+        final participantsController = Get.find<ParticipantsController>();
+        if (participantsController.selectedIds.isNotEmpty) {
+          await participantsController.sendInvitations(meeting.id ?? 0);
+        }
+      } catch (_) {
+        // Pas bloquant si le controller n'est pas disponible
+      }
+
+      // ── Charge le détail et démarre le polling ────────────────────
       final meetingsController = Get.find<MeetingsController>();
       await meetingsController.loadMeetingDetail(meeting.id ?? 0);
       await meetingsController.loadMeetings();
 
+      // ── Redirige vers le détail ───────────────────────────────────
       Get.toNamed(AppRoutes.meetingDetail, arguments: meeting.id);
+
     } catch (e) {
       status.value = 'Erreur upload: $e';
     } finally {
@@ -176,7 +175,6 @@ class RecorderController extends GetxController {
     }
   }
 
-  // ── Reset lecteur ─────────────────────────────────────────────────
   Future<void> _resetPlayer() async {
     await _player.stop();
     await _positionSub?.cancel();
@@ -190,7 +188,6 @@ class RecorderController extends GetxController {
     playbackDuration.value = Duration.zero;
   }
 
-  // ── Annuler ───────────────────────────────────────────────────────
   void cancelRecording() {
     isRecording.value = false;
     status.value = 'Enregistrement annulé.';

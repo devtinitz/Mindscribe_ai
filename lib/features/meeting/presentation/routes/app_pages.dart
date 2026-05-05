@@ -12,11 +12,11 @@ import '../pages/dashboard_page.dart';
 import '../pages/meeting_detail_page.dart';
 import '../pages/meetings_page.dart';
 import '../pages/recording_page.dart';
+import '../pages/select_participants_page.dart';
 import 'app_routes.dart';
 
 abstract class AppPages {
   static final pages = <GetPage<dynamic>>[
-    // ── Splash — fondu ───────────────────────────────────────────────
     GetPage(
       name: AppRoutes.splash,
       page: () => const SplashPage(),
@@ -24,8 +24,6 @@ abstract class AppPages {
       transition: Transition.fade,
       transitionDuration: const Duration(milliseconds: 500),
     ),
-
-    // ── Login — fondu ────────────────────────────────────────────────
     GetPage(
       name: AppRoutes.login,
       page: () => const LoginPage(),
@@ -33,8 +31,6 @@ abstract class AppPages {
       transition: Transition.fade,
       transitionDuration: const Duration(milliseconds: 400),
     ),
-
-    // ── Register — glissement depuis la droite ────────────────────────
     GetPage(
       name: AppRoutes.register,
       page: () => const RegisterPage(),
@@ -43,8 +39,6 @@ abstract class AppPages {
       transitionDuration: const Duration(milliseconds: 350),
       curve: Curves.easeOutCubic,
     ),
-
-    // ── 2FA — glissement depuis le bas ────────────────────────────────
     GetPage(
       name: AppRoutes.twoFactor,
       page: () => const TwoFactorPage(),
@@ -53,8 +47,6 @@ abstract class AppPages {
       transitionDuration: const Duration(milliseconds: 400),
       curve: Curves.easeOutCubic,
     ),
-
-    // ── Mot de passe oublié — glissement depuis la droite ────────────
     GetPage(
       name: AppRoutes.forgotPassword,
       page: () => const ForgotPasswordPage(),
@@ -63,8 +55,6 @@ abstract class AppPages {
       transitionDuration: const Duration(milliseconds: 350),
       curve: Curves.easeOutCubic,
     ),
-
-    // ── Reset password — glissement depuis la droite ──────────────────
     GetPage(
       name: AppRoutes.resetPassword,
       page: () => const ResetPasswordPage(),
@@ -73,8 +63,6 @@ abstract class AppPages {
       transitionDuration: const Duration(milliseconds: 350),
       curve: Curves.easeOutCubic,
     ),
-
-    // ── Dashboard — zoom + fondu ──────────────────────────────────────
     GetPage(
       name: AppRoutes.dashboard,
       page: () => const DashboardPage(),
@@ -83,8 +71,14 @@ abstract class AppPages {
       transitionDuration: const Duration(milliseconds: 450),
       curve: Curves.easeOutCubic,
     ),
-
-    // ── Enregistrement — glissement depuis le bas ─────────────────────
+    GetPage(
+      name: AppRoutes.selectParticipants,
+      page: () => const SelectParticipantsPage(),
+      binding: MeetingBinding(),
+      transition: Transition.downToUp,
+      transitionDuration: const Duration(milliseconds: 400),
+      curve: Curves.easeOutCubic,
+    ),
     GetPage(
       name: AppRoutes.recorder,
       page: () => const RecordingPage(),
@@ -93,8 +87,6 @@ abstract class AppPages {
       transitionDuration: const Duration(milliseconds: 400),
       curve: Curves.easeOutCubic,
     ),
-
-    // ── Mes réunions — glissement depuis la droite ────────────────────
     GetPage(
       name: AppRoutes.meetings,
       page: () => const MeetingsPage(),
@@ -103,8 +95,6 @@ abstract class AppPages {
       transitionDuration: const Duration(milliseconds: 350),
       curve: Curves.easeOutCubic,
     ),
-
-    // ── Détail réunion — glissement depuis la droite ──────────────────
     GetPage(
       name: AppRoutes.meetingDetail,
       page: () => const MeetingDetailPage(),

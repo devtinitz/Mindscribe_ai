@@ -1,4 +1,5 @@
 import '../../domain/entities/meeting.dart';
+import '../../domain/entities/team_member.dart';
 import '../../domain/repositories/meeting_repository.dart';
 import '../datasources/remote/meeting_remote_data_source.dart';
 
@@ -30,6 +31,23 @@ class MeetingRepositoryImpl implements MeetingRepository {
     return _remoteDataSource.uploadMeetingAudio(
       audioFilePath: audioFilePath,
       title: title,
+    );
+  }
+
+  @override
+  Future<List<TeamMember>> getTeamMembers() async {
+    final models = await _remoteDataSource.getTeamMembers();
+    return models.cast<TeamMember>();
+  }
+
+  @override
+  Future<void> inviteParticipants({
+    required int meetingId,
+    required List<int> memberIds,
+  }) {
+    return _remoteDataSource.inviteParticipants(
+      meetingId: meetingId,
+      memberIds: memberIds,
     );
   }
 }

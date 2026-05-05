@@ -16,6 +16,8 @@ import '../../domain/repositories/recorder_repository.dart';
 import '../../domain/usecases/get_current_user.dart';
 import '../../domain/usecases/get_meeting_details.dart';
 import '../../domain/usecases/get_meetings.dart';
+import '../../domain/usecases/get_team_members.dart';
+import '../../domain/usecases/invite_participants.dart';
 import '../../domain/usecases/login_user.dart';
 import '../../domain/usecases/logout_user.dart';
 import '../../domain/usecases/register_user.dart';
@@ -27,6 +29,7 @@ import '../../domain/usecases/stop_recording.dart';
 import '../../domain/usecases/upload_meeting_audio.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/meetings_controller.dart';
+import '../controllers/participants_controller.dart';
 import '../controllers/recorder_controller.dart';
 import '../interceptors/auth_interceptor.dart';
 
@@ -34,7 +37,7 @@ class MeetingBinding extends Bindings {
   static String get _baseUrl {
     if (kIsWeb) return 'http://localhost:8000/api';
     if (defaultTargetPlatform == TargetPlatform.android) {
-      return 'http://192.168.1.4:8000/api';
+      return 'http://192.168.1.29:8000/api';
     }
     return 'http://localhost:8000/api';
   }
@@ -56,7 +59,6 @@ class MeetingBinding extends Bindings {
           sendTimeout: const Duration(minutes: 3),
         ),
       );
-      // ── Intercepteur de session expirée ──
       dio.interceptors.add(AuthInterceptor());
       return dio;
     });
@@ -99,6 +101,8 @@ class MeetingBinding extends Bindings {
     _lazyPutIfAbsent<StartRecording>(() => StartRecording(Get.find<RecorderRepository>()));
     _lazyPutIfAbsent<StopRecording>(() => StopRecording(Get.find<RecorderRepository>()));
     _lazyPutIfAbsent<UploadMeetingAudio>(() => UploadMeetingAudio(Get.find<MeetingRepository>()));
+    _lazyPutIfAbsent<GetTeamMembers>(() => GetTeamMembers(Get.find<MeetingRepository>()));
+    _lazyPutIfAbsent<InviteParticipants>(() => InviteParticipants(Get.find<MeetingRepository>()));
 
     _lazyPutIfAbsent<AuthController>(
       () => AuthController(
@@ -123,6 +127,12 @@ class MeetingBinding extends Bindings {
         stopRecording: Get.find<StopRecording>(),
         uploadMeetingAudio: Get.find<UploadMeetingAudio>(),
         getMeetings: Get.find<GetMeetings>(),
+      ),
+    );
+    _lazyPutIfAbsent<ParticipantsController>(
+      () => ParticipantsController(
+        getTeamMembers: Get.find<GetTeamMembers>(),
+        inviteParticipants: Get.find<InviteParticipants>(),
       ),
     );
   }

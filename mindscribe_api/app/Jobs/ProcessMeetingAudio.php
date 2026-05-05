@@ -56,6 +56,10 @@ class ProcessMeetingAudio implements ShouldQueue
                 ]);
             }
 
+            // ── 7. Envoie le CR à tous les participants ───────────
+            $teamController = new \App\Http\Controllers\TeamController();
+            $teamController->sendSummaryToParticipants($this->meeting);
+
         } catch (\Throwable $e) {
             $errorMessage = $e->getMessage();
             $userMessage = 'L\'IA n\'a pas pu traiter cet enregistrement.';
@@ -119,7 +123,7 @@ PROMPT;
             ->withoutVerifying()
             ->timeout(60)
             ->post('https://api.openai.com/v1/chat/completions', [
-                'model' => 'gpt-4o',
+                'model' => config('services.openai.model', 'gpt-4-turbo'),
                 'messages' => [
                     ['role' => 'user', 'content' => $prompt],
                 ],

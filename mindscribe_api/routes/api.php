@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AudioController;
 use App\Http\Controllers\TwoFactorController;
 use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\TeamController;
 
 // Routes publiques
 Route::post('/auth/register', [AuthController::class, 'register']);
@@ -22,4 +23,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/meetings/upload', [AudioController::class, 'upload']);
     Route::post('/auth/send-code', [TwoFactorController::class, 'sendCode']);
     Route::post('/auth/verify-code', [TwoFactorController::class, 'verifyCode']);
+    Route::get('/team/members', [TeamController::class, 'index']);
+    Route::post('/meetings/{meetingId}/invite', [TeamController::class, 'inviteParticipants']);
 });

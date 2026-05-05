@@ -2,9 +2,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../models/meeting_model.dart';
+import '../../models/team_member_model.dart';
 
 abstract class MeetingRemoteDataSource {
-  Future<MeetingModel> uploadMeetingAudio({ 
+  Future<MeetingModel> uploadMeetingAudio({
     required String audioFilePath,
     required String title,
   });
@@ -14,6 +15,13 @@ abstract class MeetingRemoteDataSource {
   Future<List<MeetingModel>> getMeetings();
 
   Future<List<MeetingModel>> searchMeetings(String query);
+
+  Future<List<TeamMemberModel>> getTeamMembers();
+
+  Future<void> inviteParticipants({
+    required int meetingId,
+    required List<int> memberIds,
+  });
 }
 
 class MeetingRemoteDataSourceImpl implements MeetingRemoteDataSource {
@@ -88,5 +96,25 @@ class MeetingRemoteDataSourceImpl implements MeetingRemoteDataSource {
     return list
         .map((e) => MeetingModel.fromJson(e as Map<String, dynamic>))
         .toList();
+  }
+
+  @override
+  Future<List<TeamMemberModel>> getTeamMembers() async {
+    final response = await _dio.get<List<dynamic>>('/team/members');
+    final list = response.data ?? <dynamic>[];
+    return list
+        .map((e) => TeamMemberModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  @override
+  Future<void> inviteParticipants({
+    required int meetingId,
+    required List<int> memberIds,
+  }) async {
+    await _dio.post<void>(
+      '/meetings/$meetingId/invite',
+      data: {'member_ids': memberIds},
+    );
   }
 }
