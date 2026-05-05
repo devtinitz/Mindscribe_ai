@@ -143,7 +143,7 @@ class DashboardPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     GestureDetector(
-                      onTap: () => Get.toNamed(AppRoutes.recorder),
+                      onTap: () => Get.toNamed(AppRoutes.selectParticipants),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 16, vertical: 10),
@@ -487,7 +487,7 @@ class DashboardPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                       ElevatedButton.icon(
-                        onPressed: () => Get.toNamed(AppRoutes.recorder),
+                        onPressed: () => Get.toNamed(AppRoutes.selectParticipants),
                         icon: const Icon(Icons.mic_rounded, size: 16),
                         label: const Text('Commencer'),
                         style: ElevatedButton.styleFrom(
@@ -569,7 +569,7 @@ class DashboardPage extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       subtitle: Text(
-                        '${meeting.createdAt.day}/${meeting.createdAt.month}/${meeting.createdAt.year}',
+                        '${meeting.createdAt.day.toString().padLeft(2, '0')}/${meeting.createdAt.month.toString().padLeft(2, '0')}/${meeting.createdAt.year}',
                         style: TextStyle(
                             fontSize: 12, color: AppColors.textSecondary),
                       ),

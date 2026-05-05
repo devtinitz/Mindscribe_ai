@@ -16,18 +16,13 @@ class RecordingPage extends GetView<RecorderController> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       drawer: const AppSidebar(),
-      body: Stack(
-        children: [
-          const _AnimatedBackground(),
-          SafeArea(
-            child: Column(
-              children: [
-                _buildAppBar(context),
-                Expanded(child: Obx(() => _buildBody(size))),
-              ],
-            ),
-          ),
-        ],
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildAppBar(context),
+            Expanded(child: Obx(() => _buildBody(size))),
+          ],
+        ),
       ),
     );
   }
@@ -38,7 +33,6 @@ class RecordingPage extends GetView<RecorderController> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         children: [
-          // ── Bouton sidebar à gauche ──
           Builder(
             builder: (ctx) => GestureDetector(
               onTap: () => Scaffold.of(ctx).openDrawer(),
@@ -165,9 +159,35 @@ class RecordingPage extends GetView<RecorderController> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Écoutez votre enregistrement avant de valider',
+            'Donnez un titre à votre réunion',
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 16),
+
+          // ── Champ titre ───────────────────────────────────────────
+          TextField(
+            controller: controller.titleController,
+            decoration: InputDecoration(
+              hintText: 'Ex: Réunion de suivi projet...',
+              prefixIcon: const Icon(Icons.edit_outlined,
+                  size: 18, color: AppColors.hint),
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: const BorderSide(color: AppColors.border),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: const BorderSide(color: AppColors.border),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide:
+                    const BorderSide(color: AppColors.primary, width: 1.5),
+              ),
+            ),
           ),
 
           const SizedBox(height: 40),

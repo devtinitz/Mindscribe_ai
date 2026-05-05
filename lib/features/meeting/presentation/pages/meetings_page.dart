@@ -40,10 +40,10 @@ class MeetingsPage extends GetView<MeetingsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.background,
       drawer: const AppSidebar(),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         foregroundColor: AppColors.primary,
         elevation: 0,
         leading: Builder(
@@ -233,7 +233,7 @@ class _MeetingCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${meeting.createdAt.day}/${meeting.createdAt.month}/${meeting.createdAt.year}',
+                      '${meeting.createdAt.day.toString().padLeft(2, '0')}/${meeting.createdAt.month.toString().padLeft(2, '0')}/${meeting.createdAt.year}',
                       style: TextStyle(
                           fontSize: 12, color: AppColors.textSecondary),
                     ),

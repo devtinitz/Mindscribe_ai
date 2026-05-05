@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
 
@@ -27,6 +28,9 @@ class RecorderController extends GetxController {
   final StopRecording _stopRecording;
   final UploadMeetingAudio _uploadMeetingAudio;
   final GetMeetings _getMeetings;
+
+  // ── Champ titre ───────────────────────────────────────────────────
+  final titleController = TextEditingController();
 
   final isRecording = false.obs;
   final isUploading = false.obs;
@@ -128,7 +132,10 @@ class RecorderController extends GetxController {
   }
 
   Future<void> _uploadRecording(String path) async {
-    final title = await _buildAutoTitle();
+    final title = titleController.text.trim().isNotEmpty
+        ? titleController.text.trim()
+        : await _buildAutoTitle();
+    titleController.clear();
     isUploading.value = true;
     status.value = 'Envoi en cours...';
 
@@ -200,6 +207,7 @@ class RecorderController extends GetxController {
   @override
   void onClose() {
     _timer?.cancel();
+    titleController.dispose();
     _resetPlayer();
     _player.dispose();
     super.onClose();

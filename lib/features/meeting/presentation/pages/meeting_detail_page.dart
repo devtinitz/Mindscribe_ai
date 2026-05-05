@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import '../controllers/meetings_controller.dart';
 import '../theme/app_colors.dart';
-import '../widgets/app_menu.dart';
 
 class MeetingDetailPage extends GetView<MeetingsController> {
   const MeetingDetailPage({super.key});
@@ -30,20 +30,12 @@ class MeetingDetailPage extends GetView<MeetingsController> {
           Obx(() {
             final meeting = controller.selectedMeeting.value;
             if (meeting == null || meeting.status != 'done') {
-              return const AppMenu();
+              return const SizedBox();
             }
-            return Row(
-              children: [
-                IconButton(
-                  onPressed: () => _exportPdf(meeting),
-                  icon: const Icon(Icons.picture_as_pdf_rounded),
-                  tooltip: 'Exporter en PDF',
-                ),
-                const Padding(
-                  padding: EdgeInsets.only(right: 8),
-                  child: AppMenu(),
-                ),
-              ],
+            return IconButton(
+              onPressed: () => _exportPdf(meeting),
+              icon: const Icon(Icons.picture_as_pdf_rounded),
+              tooltip: 'Exporter en PDF',
             );
           }),
         ],
@@ -436,13 +428,17 @@ class MeetingDetailPage extends GetView<MeetingsController> {
           ),
           const SizedBox(height: 4),
           Text(
-            '${meeting.createdAt.day}/${meeting.createdAt.month}/${meeting.createdAt.year} à ${meeting.createdAt.hour.toString().padLeft(2, '0')}h${meeting.createdAt.minute.toString().padLeft(2, '0')}',
+            '${meeting.createdAt.day.toString().padLeft(2, '0')}/${meeting.createdAt.month.toString().padLeft(2, '0')}/${meeting.createdAt.year} à ${meeting.createdAt.hour.toString().padLeft(2, '0')}h${meeting.createdAt.minute.toString().padLeft(2, '0')}',
             style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
           ),
 
           const SizedBox(height: 16),
 
-          // Bouton export PDF
+          // ── Lecteur audio ─────────────────────────────────────────
+          if (meeting.audioPath != null && meeting.audioPath!.isNotEmpty)
+            _AudioPlayerWidget(audioUrl: 'http://192.168.1.29:8000/storage/${meeting.audioPath}'),
+
+          const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
@@ -614,6 +610,178 @@ class MeetingDetailPage extends GetView<MeetingsController> {
           ),
           const SizedBox(height: 12),
           child,
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Lecteur audio ────────────────────────────────────────────────────────────
+
+class _AudioPlayerWidget extends StatefulWidget {
+  final String audioUrl;
+  const _AudioPlayerWidget({required this.audioUrl});
+
+  @override
+  State<_AudioPlayerWidget> createState() => _AudioPlayerWidgetState();
+}
+
+class _AudioPlayerWidgetState extends State<_AudioPlayerWidget> {
+  late final AudioPlayer _player;
+  bool _isPlaying = false;
+  Duration _position = Duration.zero;
+  Duration _duration = Duration.zero;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _player = AudioPlayer();
+    _init();
+  }
+
+  Future<void> _init() async {
+    try {
+      await _player.setUrl(widget.audioUrl);
+      _player.durationStream.listen((d) {
+        if (d != null && mounted) setState(() => _duration = d);
+      });
+      _player.positionStream.listen((p) {
+        if (mounted) setState(() => _position = p);
+      });
+      _player.playerStateStream.listen((state) {
+        if (mounted) {
+          setState(() => _isPlaying = state.playing);
+          if (state.processingState == ProcessingState.completed) {
+            _player.seek(Duration.zero);
+          }
+        }
+      });
+      if (mounted) setState(() => _loading = false);
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    _player.dispose();
+    super.dispose();
+  }
+
+  String _fmt(Duration d) {
+    final m = d.inMinutes.toString().padLeft(2, '0');
+    final s = (d.inSeconds % 60).toString().padLeft(2, '0');
+    return '$m:$s';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.mic_rounded, color: AppColors.primary, size: 18),
+              const SizedBox(width: 8),
+              Text(
+                'Enregistrement audio',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (_loading)
+            const Center(child: CircularProgressIndicator())
+          else
+            Row(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    if (_isPlaying) {
+                      _player.pause();
+                    } else {
+                      _player.play();
+                    }
+                  },
+                  child: Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      _isPlaying
+                          ? Icons.pause_rounded
+                          : Icons.play_arrow_rounded,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    children: [
+                      SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          activeTrackColor: AppColors.primary,
+                          inactiveTrackColor: AppColors.border,
+                          thumbColor: AppColors.primary,
+                          trackHeight: 3,
+                          thumbShape: const RoundSliderThumbShape(
+                              enabledThumbRadius: 6),
+                        ),
+                        child: Slider(
+                          value: _duration.inMilliseconds > 0
+                              ? (_position.inMilliseconds /
+                                      _duration.inMilliseconds)
+                                  .clamp(0.0, 1.0)
+                              : 0.0,
+                          onChanged: (v) {
+                            _player.seek(Duration(
+                                milliseconds:
+                                    (v * _duration.inMilliseconds).toInt()));
+                          },
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(_fmt(_position),
+                              style: TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.textSecondary)),
+                          Text(_fmt(_duration),
+                              style: TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.textSecondary)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
         ],
       ),
     );

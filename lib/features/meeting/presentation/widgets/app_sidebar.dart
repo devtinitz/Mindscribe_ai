@@ -94,7 +94,7 @@ class AppSidebar extends StatelessWidget {
             _NavItem(
               icon: Icons.mic_rounded,
               label: 'Nouvelle réunion',
-              route: AppRoutes.recorder,
+              route: AppRoutes.selectParticipants,
             ),
             _NavItem(
               icon: Icons.list_alt_rounded,
