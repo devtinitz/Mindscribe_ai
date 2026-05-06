@@ -170,7 +170,7 @@ class _SplashPageState extends State<SplashPage>
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Vos réunions, intelligemment',
+                            'Vos réunions gérées intelligemment',
                             style: TextStyle(
                               fontSize: 14,
                               color: AppColors.textSecondary,
