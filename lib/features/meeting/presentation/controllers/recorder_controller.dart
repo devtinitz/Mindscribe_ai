@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:record/record.dart';
 
 import '../../domain/entities/meeting.dart';
 import '../../domain/usecases/get_meetings.dart';
@@ -54,6 +56,16 @@ class RecorderController extends GetxController {
     try {
       await _resetPlayer();
       hasRecorded.value = false;
+
+      // ── Demande permission micro sur web ──────────────────────────
+      if (kIsWeb) {
+        final hasPermission = await AudioRecorder().hasPermission();
+        if (!hasPermission) {
+          status.value = 'Permission microphone refusée. Autorisez l\'accès dans votre navigateur.';
+          return;
+        }
+      }
+
       await _startRecording();
       isRecording.value = true;
       status.value = 'Enregistrement en cours...';

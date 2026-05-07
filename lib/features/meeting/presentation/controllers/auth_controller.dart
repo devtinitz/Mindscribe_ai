@@ -40,6 +40,9 @@ class AuthController extends GetxController {
   final twoFactorError = RxnString();
   final currentUser = Rxn<User>();
 
+  // Indique si on vient de l'inscription (pour le message de bienvenue)
+  bool _isNewUser = false;
+
   @override
   void onInit() {
     super.onInit();
@@ -52,6 +55,7 @@ class AuthController extends GetxController {
     isVerifying.value = false;
     errorMessage.value = null;
     twoFactorError.value = null;
+    _isNewUser = false;
     nameController.clear();
     emailController.clear();
     passwordController.clear();
@@ -94,6 +98,7 @@ class AuthController extends GetxController {
     return 'Une erreur est survenue. Réessayez.';
   }
 
+  // ── Connexion → dashboard directement (sans 2FA) ──────────────────
   Future<void> login() async {
     if (isLoading.value) return;
 
@@ -105,6 +110,7 @@ class AuthController extends GetxController {
 
     isLoading.value = true;
     errorMessage.value = null;
+    _isNewUser = false;
 
     try {
       final user = await _loginUser(
@@ -112,10 +118,20 @@ class AuthController extends GetxController {
         password: passwordController.text,
       );
       currentUser.value = user;
-      twoFactorController.clear();
-      twoFactorError.value = null;
-      await _sendTwoFactorCode();
-      Get.offAllNamed(AppRoutes.twoFactor);
+
+      // Connexion directe sans 2FA
+      Get.snackbar(
+        '👋 Bienvenue !',
+        'Content de vous revoir, ${user.name} !',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: AppColors.primary.withOpacity(0.9),
+        colorText: Colors.white,
+        borderRadius: 16,
+        margin: const EdgeInsets.all(16),
+        duration: const Duration(seconds: 3),
+        icon: const Icon(Icons.check_circle_rounded, color: Colors.white),
+      );
+      Get.offAllNamed(AppRoutes.dashboard);
     } catch (e) {
       errorMessage.value = _simplifyError(e);
     } finally {
@@ -123,6 +139,7 @@ class AuthController extends GetxController {
     }
   }
 
+  // ── Vérifier le code 2FA (seulement après inscription) ───────────
   Future<void> verifyTwoFactor() async {
     if (isVerifying.value) return;
 
@@ -141,17 +158,34 @@ class AuthController extends GetxController {
         twoFactorError.value = null;
         isVerifying.value = false;
         final user = currentUser.value;
-        Get.snackbar(
-          '👋 Bienvenue !',
-          'Bonjour ${user?.name ?? ''}, content de vous revoir.',
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: AppColors.primary.withOpacity(0.9),
-          colorText: Colors.white,
-          borderRadius: 16,
-          margin: const EdgeInsets.all(16),
-          duration: const Duration(seconds: 3),
-          icon: const Icon(Icons.check_circle_rounded, color: Colors.white),
-        );
+
+        // Message différent selon nouveau ou ancien compte
+        if (_isNewUser) {
+          Get.snackbar(
+            '🎉 Bienvenue sur MindScribe AI !',
+            'Votre compte est confirmé. Bonne utilisation ${user?.name ?? ''} !',
+            snackPosition: SnackPosition.TOP,
+            backgroundColor: AppColors.success.withOpacity(0.9),
+            colorText: Colors.white,
+            borderRadius: 16,
+            margin: const EdgeInsets.all(16),
+            duration: const Duration(seconds: 4),
+            icon: const Icon(Icons.celebration_rounded, color: Colors.white),
+          );
+        } else {
+          Get.snackbar(
+            '👋 Bienvenue !',
+            'Content de vous revoir, ${user?.name ?? ''} !',
+            snackPosition: SnackPosition.TOP,
+            backgroundColor: AppColors.primary.withOpacity(0.9),
+            colorText: Colors.white,
+            borderRadius: 16,
+            margin: const EdgeInsets.all(16),
+            duration: const Duration(seconds: 3),
+            icon: const Icon(Icons.check_circle_rounded, color: Colors.white),
+          );
+        }
+        _isNewUser = false;
         Get.offAllNamed(AppRoutes.dashboard);
       } else {
         twoFactorError.value = 'Code invalide ou expiré. Réessayez.';
@@ -163,6 +197,7 @@ class AuthController extends GetxController {
           msg.contains('xmlhttp') || msg.contains('failed to fetch')) {
         twoFactorError.value = null;
         isVerifying.value = false;
+        _isNewUser = false;
         Get.offAllNamed(AppRoutes.dashboard);
       } else {
         twoFactorError.value = 'Code invalide ou expiré. Réessayez.';
@@ -191,6 +226,7 @@ class AuthController extends GetxController {
     }
   }
 
+  // ── Inscription → 2FA pour confirmer le compte ────────────────────
   Future<void> register() async {
     if (isLoading.value) return;
 
@@ -222,20 +258,23 @@ class AuthController extends GetxController {
         password: passwordController.text,
       );
       currentUser.value = user;
-      // Envoie le code 2FA après inscription
+      _isNewUser = true;
+
+      // Envoie code 2FA pour confirmation du compte
       twoFactorController.clear();
       twoFactorError.value = null;
       await _sendTwoFactorCode();
+
       Get.snackbar(
-        '🎉 Compte créé !',
-        'Bienvenue ${user.name} ! Vérifiez votre email pour le code de confirmation.',
+        '📧 Code envoyé !',
+        'Un code de confirmation a été envoyé à ${user.email}.',
         snackPosition: SnackPosition.TOP,
         backgroundColor: AppColors.primary.withOpacity(0.9),
         colorText: Colors.white,
         borderRadius: 16,
         margin: const EdgeInsets.all(16),
-        duration: const Duration(seconds: 3),
-        icon: const Icon(Icons.check_circle_rounded, color: Colors.white),
+        duration: const Duration(seconds: 4),
+        icon: const Icon(Icons.email_rounded, color: Colors.white),
       );
       Get.offAllNamed(AppRoutes.twoFactor);
     } catch (e) {
@@ -250,16 +289,11 @@ class AuthController extends GetxController {
       await _logoutUser();
     } catch (_) {}
 
-    // Reset complet
     _resetState();
     currentUser.value = null;
 
-    // Supprime complètement le controller de GetX pour forcer une réinitialisation
     await Future.delayed(const Duration(milliseconds: 200));
-
-    // Recrée le controller proprement
     Get.delete<AuthController>(force: true);
-
     Get.offAllNamed(AppRoutes.login);
   }
 }
