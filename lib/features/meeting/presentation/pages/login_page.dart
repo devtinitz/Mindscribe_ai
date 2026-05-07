@@ -173,7 +173,10 @@ class LoginPage extends GetView<AuthController> {
 
           const SizedBox(height: 16),
 
-          _PasswordField(controller: controller.passwordController),
+          _PasswordField(
+            controller: controller.passwordController,
+            onSubmitted: (_) => controller.login(),
+          ),
 
           const SizedBox(height: 10),
 
@@ -548,7 +551,8 @@ class _InputField extends StatelessWidget {
 
 class _PasswordField extends StatefulWidget {
   final TextEditingController controller;
-  const _PasswordField({required this.controller});
+  final ValueChanged<String>? onSubmitted;
+  const _PasswordField({required this.controller, this.onSubmitted});
 
   @override
   State<_PasswordField> createState() => _PasswordFieldState();
@@ -562,6 +566,8 @@ class _PasswordFieldState extends State<_PasswordField> {
     return TextField(
       controller: widget.controller,
       obscureText: _obscure,
+      textInputAction: TextInputAction.go,
+      onSubmitted: widget.onSubmitted,
       style: const TextStyle(
         color: AppColors.text,
         fontSize: 15,

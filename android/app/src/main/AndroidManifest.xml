@@ -7,9 +7,10 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:label="mindscribe_app"
+        android:label="Mindscribe AI"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="true">
 
         <!-- Désactive Impeller (fix écran blanc sur émulateur) -->
         <meta-data

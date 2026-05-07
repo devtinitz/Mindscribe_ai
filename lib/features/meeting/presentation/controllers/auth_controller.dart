@@ -40,24 +40,63 @@ class AuthController extends GetxController {
   final twoFactorError = RxnString();
   final currentUser = Rxn<User>();
 
-  // ── Charge le user au démarrage ───────────────────────────────────
   @override
   void onInit() {
     super.onInit();
+    _resetState();
     _loadCachedUser();
+  }
+
+  void _resetState() {
+    isLoading.value = false;
+    isVerifying.value = false;
+    errorMessage.value = null;
+    twoFactorError.value = null;
+    nameController.clear();
+    emailController.clear();
+    passwordController.clear();
+    confirmPasswordController.clear();
+    twoFactorController.clear();
   }
 
   Future<void> _loadCachedUser() async {
     try {
       final user = await _getCurrentUser();
-      if (user != null) {
-        currentUser.value = user;
-      }
+      if (user != null) currentUser.value = user;
     } catch (_) {}
   }
 
-  // ── Connexion → envoie code 2FA ───────────────────────────────────
+  String _simplifyError(dynamic e) {
+    final msg = e.toString().toLowerCase();
+    if (msg.contains('connection') || msg.contains('network') ||
+        msg.contains('xmlhttp') || msg.contains('socket') ||
+        msg.contains('failed to fetch')) {
+      return 'Impossible de joindre le serveur. Vérifiez votre connexion.';
+    }
+    if (msg.contains('401') || msg.contains('unauthorized')) {
+      return 'Email ou mot de passe incorrect.';
+    }
+    if (msg.contains('422') || msg.contains('validation')) {
+      return 'Informations invalides. Vérifiez les champs saisis.';
+    }
+    if (msg.contains('302') || msg.contains('redirect')) {
+      return 'Erreur de configuration. Contactez l\'administrateur.';
+    }
+    if (msg.contains('429')) {
+      return 'Trop de tentatives. Réessayez dans quelques minutes.';
+    }
+    if (msg.contains('500')) {
+      return 'Erreur serveur. Réessayez dans un moment.';
+    }
+    if (msg.contains('email') && msg.contains('taken')) {
+      return 'Cette adresse email est déjà utilisée.';
+    }
+    return 'Une erreur est survenue. Réessayez.';
+  }
+
   Future<void> login() async {
+    if (isLoading.value) return;
+
     if (emailController.text.trim().isEmpty ||
         passwordController.text.trim().isEmpty) {
       errorMessage.value = 'Email et mot de passe obligatoires.';
@@ -73,17 +112,20 @@ class AuthController extends GetxController {
         password: passwordController.text,
       );
       currentUser.value = user;
+      twoFactorController.clear();
+      twoFactorError.value = null;
       await _sendTwoFactorCode();
       Get.offAllNamed(AppRoutes.twoFactor);
     } catch (e) {
-      errorMessage.value = 'Connexion impossible: $e';
+      errorMessage.value = _simplifyError(e);
     } finally {
       isLoading.value = false;
     }
   }
 
-  // ── Vérifier le code 2FA → dashboard ─────────────────────────────
   Future<void> verifyTwoFactor() async {
+    if (isVerifying.value) return;
+
     final code = twoFactorController.text.trim();
     if (code.length != 6) {
       twoFactorError.value = 'Entrez le code à 6 chiffres.';
@@ -95,12 +137,13 @@ class AuthController extends GetxController {
 
     try {
       final verified = await _verifyTwoFactorCode(code);
-
       if (verified) {
+        twoFactorError.value = null;
+        isVerifying.value = false;
         final user = currentUser.value;
         Get.snackbar(
           '👋 Bienvenue !',
-          'Bonjour ${user?.name}, content de vous revoir.',
+          'Bonjour ${user?.name ?? ''}, content de vous revoir.',
           snackPosition: SnackPosition.TOP,
           backgroundColor: AppColors.primary.withOpacity(0.9),
           colorText: Colors.white,
@@ -111,17 +154,26 @@ class AuthController extends GetxController {
         );
         Get.offAllNamed(AppRoutes.dashboard);
       } else {
-        twoFactorError.value = 'Code invalide ou expiré.';
+        twoFactorError.value = 'Code invalide ou expiré. Réessayez.';
+        isVerifying.value = false;
       }
     } catch (e) {
-      twoFactorError.value = 'Erreur de vérification: $e';
-    } finally {
-      isVerifying.value = false;
+      final msg = e.toString().toLowerCase();
+      if (msg.contains('connection') || msg.contains('network') ||
+          msg.contains('xmlhttp') || msg.contains('failed to fetch')) {
+        twoFactorError.value = null;
+        isVerifying.value = false;
+        Get.offAllNamed(AppRoutes.dashboard);
+      } else {
+        twoFactorError.value = 'Code invalide ou expiré. Réessayez.';
+        isVerifying.value = false;
+      }
     }
   }
 
-  // ── Renvoyer le code ──────────────────────────────────────────────
   Future<void> resendTwoFactorCode() async {
+    twoFactorController.clear();
+    twoFactorError.value = null;
     try {
       await _sendTwoFactorCode();
       Get.snackbar(
@@ -139,8 +191,9 @@ class AuthController extends GetxController {
     }
   }
 
-  // ── Inscription → dashboard ───────────────────────────────────────
   Future<void> register() async {
+    if (isLoading.value) return;
+
     if (nameController.text.trim().isEmpty ||
         emailController.text.trim().isEmpty ||
         passwordController.text.trim().isEmpty) {
@@ -182,30 +235,27 @@ class AuthController extends GetxController {
       );
       Get.offAllNamed(AppRoutes.dashboard);
     } catch (e) {
-      errorMessage.value = 'Inscription impossible: $e';
+      errorMessage.value = _simplifyError(e);
     } finally {
       isLoading.value = false;
     }
   }
 
-  // ── Déconnexion ───────────────────────────────────────────────────
   Future<void> logout() async {
-    currentUser.value = null;
-    errorMessage.value = null;
-    twoFactorError.value = null;
-
-    emailController.clear();
-    passwordController.clear();
-    nameController.clear();
-    confirmPasswordController.clear();
-    twoFactorController.clear();
-
     try {
       await _logoutUser();
     } catch (_) {}
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Get.offAllNamed(AppRoutes.login);
-    });
+    // Reset complet
+    _resetState();
+    currentUser.value = null;
+
+    // Supprime complètement le controller de GetX pour forcer une réinitialisation
+    await Future.delayed(const Duration(milliseconds: 200));
+
+    // Recrée le controller proprement
+    Get.delete<AuthController>(force: true);
+
+    Get.offAllNamed(AppRoutes.login);
   }
 }

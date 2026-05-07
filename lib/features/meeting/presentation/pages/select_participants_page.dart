@@ -18,7 +18,7 @@ class SelectParticipantsPage extends StatelessWidget {
         backgroundColor: Colors.white.withOpacity(0.9),
         elevation: 0,
         leading: GestureDetector(
-          onTap: () => Get.back(),
+          onTap: () => Get.offAllNamed(AppRoutes.dashboard),
           child: Container(
             margin: const EdgeInsets.all(8),
             decoration: BoxDecoration(
