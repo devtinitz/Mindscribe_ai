@@ -222,9 +222,13 @@ class AuthController extends GetxController {
         password: passwordController.text,
       );
       currentUser.value = user;
+      // Envoie le code 2FA après inscription
+      twoFactorController.clear();
+      twoFactorError.value = null;
+      await _sendTwoFactorCode();
       Get.snackbar(
         '🎉 Compte créé !',
-        'Bienvenue ${user.name}, votre compte a été créé avec succès.',
+        'Bienvenue ${user.name} ! Vérifiez votre email pour le code de confirmation.',
         snackPosition: SnackPosition.TOP,
         backgroundColor: AppColors.primary.withOpacity(0.9),
         colorText: Colors.white,
@@ -233,7 +237,7 @@ class AuthController extends GetxController {
         duration: const Duration(seconds: 3),
         icon: const Icon(Icons.check_circle_rounded, color: Colors.white),
       );
-      Get.offAllNamed(AppRoutes.dashboard);
+      Get.offAllNamed(AppRoutes.twoFactor);
     } catch (e) {
       errorMessage.value = _simplifyError(e);
     } finally {
