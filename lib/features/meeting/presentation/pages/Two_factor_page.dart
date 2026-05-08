@@ -14,12 +14,13 @@ class TwoFactorPage extends GetView<AuthController> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _HoverButton(
+        child: Stack(
+          children: [
+            // ── Bouton retour fixe ────────────────────────────────
+            Positioned(
+              top: 16,
+              left: 16,
+              child: _HoverButton(
                 onTap: () => Get.offAllNamed(AppRoutes.login),
                 child: Container(
                   width: 40,
@@ -33,8 +34,17 @@ class TwoFactorPage extends GetView<AuthController> {
                       size: 16, color: AppColors.primary),
                 ),
               ),
-
-              const SizedBox(height: 40),
+            ),
+            // ── Contenu centré ────────────────────────────────────
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 480),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(28, 72, 28, 32),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 16),
 
               Center(
                 child: Container(
@@ -172,6 +182,10 @@ class TwoFactorPage extends GetView<AuthController> {
               ),
             ],
           ),
+        ),
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -70,34 +70,6 @@ class AuthController extends GetxController {
     } catch (_) {}
   }
 
-  String _simplifyError(dynamic e) {
-    final msg = e.toString().toLowerCase();
-    if (msg.contains('connection') || msg.contains('network') ||
-        msg.contains('xmlhttp') || msg.contains('socket') ||
-        msg.contains('failed to fetch')) {
-      return 'Impossible de joindre le serveur. Vérifiez votre connexion.';
-    }
-    if (msg.contains('401') || msg.contains('unauthorized')) {
-      return 'Email ou mot de passe incorrect.';
-    }
-    if (msg.contains('422') || msg.contains('validation')) {
-      return 'Informations invalides. Vérifiez les champs saisis.';
-    }
-    if (msg.contains('302') || msg.contains('redirect')) {
-      return 'Erreur de configuration. Contactez l\'administrateur.';
-    }
-    if (msg.contains('429')) {
-      return 'Trop de tentatives. Réessayez dans quelques minutes.';
-    }
-    if (msg.contains('500')) {
-      return 'Erreur serveur. Réessayez dans un moment.';
-    }
-    if (msg.contains('email') && msg.contains('taken')) {
-      return 'Cette adresse email est déjà utilisée.';
-    }
-    return 'Une erreur est survenue. Réessayez.';
-  }
-
   // ── Connexion → dashboard directement (sans 2FA) ──────────────────
   Future<void> login() async {
     if (isLoading.value) return;
@@ -119,7 +91,6 @@ class AuthController extends GetxController {
       );
       currentUser.value = user;
 
-      // Connexion directe sans 2FA
       Get.snackbar(
         '👋 Bienvenue !',
         'Content de vous revoir, ${user.name} !',
@@ -133,7 +104,7 @@ class AuthController extends GetxController {
       );
       Get.offAllNamed(AppRoutes.dashboard);
     } catch (e) {
-      errorMessage.value = _simplifyError(e);
+      errorMessage.value = e.toString().replaceAll('Exception: ', '');
     } finally {
       isLoading.value = false;
     }
@@ -159,7 +130,6 @@ class AuthController extends GetxController {
         isVerifying.value = false;
         final user = currentUser.value;
 
-        // Message différent selon nouveau ou ancien compte
         if (_isNewUser) {
           Get.snackbar(
             '🎉 Bienvenue sur MindScribe AI !',
@@ -260,7 +230,6 @@ class AuthController extends GetxController {
       currentUser.value = user;
       _isNewUser = true;
 
-      // Envoie code 2FA pour confirmation du compte
       twoFactorController.clear();
       twoFactorError.value = null;
       await _sendTwoFactorCode();
@@ -278,7 +247,7 @@ class AuthController extends GetxController {
       );
       Get.offAllNamed(AppRoutes.twoFactor);
     } catch (e) {
-      errorMessage.value = _simplifyError(e);
+      errorMessage.value = e.toString().replaceAll('Exception: ', '');
     } finally {
       isLoading.value = false;
     }

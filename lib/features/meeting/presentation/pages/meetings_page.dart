@@ -40,10 +40,10 @@ class MeetingsPage extends GetView<MeetingsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.transparent,
       drawer: const AppSidebar(),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.white.withOpacity(0.85),
         foregroundColor: AppColors.primary,
         elevation: 0,
         leading: Builder(
@@ -78,7 +78,7 @@ class MeetingsPage extends GetView<MeetingsController> {
           Padding(
             padding: const EdgeInsets.only(right: 16, top: 8),
             child: FloatingActionButton.extended(
-              onPressed: () => Get.toNamed(AppRoutes.recorder),
+              onPressed: () => Get.toNamed(AppRoutes.selectParticipants),
               backgroundColor: AppColors.primary,
               elevation: 2,
               icon: const Icon(Icons.mic_rounded, color: Colors.white, size: 18),
@@ -103,6 +103,8 @@ class MeetingsPage extends GetView<MeetingsController> {
               decoration: InputDecoration(
                 hintText: 'Rechercher un compte-rendu...',
                 prefixIcon: const Icon(Icons.search),
+                filled: true,
+                fillColor: Colors.white.withOpacity(0.85),
                 suffixIcon: IconButton(
                   onPressed: controller.search,
                   icon: const Icon(Icons.arrow_forward_rounded),
@@ -133,7 +135,7 @@ class MeetingsPage extends GetView<MeetingsController> {
                         ),
                         const SizedBox(height: 8),
                         TextButton(
-                          onPressed: () => Get.toNamed(AppRoutes.recorder),
+                          onPressed: () => Get.toNamed(AppRoutes.selectParticipants),
                           child: const Text('Commencer un enregistrement'),
                         ),
                       ],
@@ -241,8 +243,7 @@ class _MeetingCard extends StatelessWidget {
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
                   color: statusColor.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(999),

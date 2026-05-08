@@ -412,7 +412,9 @@ class MeetingDetailPage extends GetView<MeetingsController> {
 
   // ── Vue résultat complet ──────────────────────────────────────────
   Widget _buildResultView(meeting, BuildContext context) {
-    return SingleChildScrollView(
+    return Container(
+      color: Colors.transparent,
+      child: SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -566,6 +568,7 @@ class MeetingDetailPage extends GetView<MeetingsController> {
           const SizedBox(height: 32),
         ],
       ),
+    ),
     );
   }
 

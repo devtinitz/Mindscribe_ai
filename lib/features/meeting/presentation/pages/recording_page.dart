@@ -17,16 +17,11 @@ class RecordingPage extends GetView<RecorderController> {
       backgroundColor: Colors.transparent,
       drawer: const AppSidebar(),
       body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600),
-            child: Column(
-              children: [
-                _buildAppBar(context),
-                Expanded(child: Obx(() => _buildBody(size))),
-              ],
-            ),
-          ),
+        child: Column(
+          children: [
+            _buildAppBar(context),
+            Expanded(child: Obx(() => _buildBody(size))),
+          ],
         ),
       ),
     );
