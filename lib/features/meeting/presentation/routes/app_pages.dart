@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../bindings/meeting_binding.dart';
+import '../middleware/auth_middleware.dart';
 import '../pages/splash_page.dart';
 import '../pages/login_page.dart';
 import '../pages/register_page.dart';
@@ -17,6 +18,7 @@ import 'app_routes.dart';
 
 abstract class AppPages {
   static final pages = <GetPage<dynamic>>[
+    // ── Pages publiques (sans middleware) ─────────────────────────
     GetPage(
       name: AppRoutes.splash,
       page: () => const SplashPage(),
@@ -63,10 +65,13 @@ abstract class AppPages {
       transitionDuration: const Duration(milliseconds: 350),
       curve: Curves.easeOutCubic,
     ),
+
+    // ── Pages protégées (avec AuthMiddleware) ─────────────────────
     GetPage(
       name: AppRoutes.dashboard,
       page: () => const DashboardPage(),
       binding: MeetingBinding(),
+      middlewares: [AuthMiddleware()],
       transition: Transition.fadeIn,
       transitionDuration: const Duration(milliseconds: 450),
       curve: Curves.easeOutCubic,
@@ -75,6 +80,7 @@ abstract class AppPages {
       name: AppRoutes.selectParticipants,
       page: () => const SelectParticipantsPage(),
       binding: MeetingBinding(),
+      middlewares: [AuthMiddleware()],
       transition: Transition.downToUp,
       transitionDuration: const Duration(milliseconds: 400),
       curve: Curves.easeOutCubic,
@@ -83,6 +89,7 @@ abstract class AppPages {
       name: AppRoutes.recorder,
       page: () => const RecordingPage(),
       binding: MeetingBinding(),
+      middlewares: [AuthMiddleware()],
       transition: Transition.downToUp,
       transitionDuration: const Duration(milliseconds: 400),
       curve: Curves.easeOutCubic,
@@ -91,6 +98,7 @@ abstract class AppPages {
       name: AppRoutes.meetings,
       page: () => const MeetingsPage(),
       binding: MeetingBinding(),
+      middlewares: [AuthMiddleware()],
       transition: Transition.rightToLeft,
       transitionDuration: const Duration(milliseconds: 350),
       curve: Curves.easeOutCubic,
@@ -99,6 +107,7 @@ abstract class AppPages {
       name: AppRoutes.meetingDetail,
       page: () => const MeetingDetailPage(),
       binding: MeetingBinding(),
+      middlewares: [AuthMiddleware()],
       transition: Transition.rightToLeft,
       transitionDuration: const Duration(milliseconds: 350),
       curve: Curves.easeOutCubic,

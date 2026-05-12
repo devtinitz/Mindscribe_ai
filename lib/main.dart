@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_strategy/url_strategy.dart';
 
 import 'features/meeting/presentation/routes/app_pages.dart';
 import 'features/meeting/presentation/routes/app_routes.dart';
@@ -9,6 +10,7 @@ import 'features/meeting/presentation/theme/app_colors.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  setPathUrlStrategy(); // Supprime le # dans les URLs web
   final prefs = await SharedPreferences.getInstance();
   Get.put<SharedPreferences>(prefs, permanent: true);
   runApp(const MyApp());
@@ -60,6 +62,12 @@ class MyApp extends StatelessWidget {
       },
       initialRoute: AppRoutes.splash,
       getPages: AppPages.pages,
+      unknownRoute: GetPage(
+        name: '/not-found',
+        page: () => const Scaffold(
+          body: Center(child: Text('Page introuvable')),
+        ),
+      ),
     );
   }
 }
@@ -67,9 +75,9 @@ class MyApp extends StatelessWidget {
 // ─── Bulle avec position et vitesse indépendantes ────────────────────────────
 
 class _BubbleData {
-  double x, y;         // position actuelle (0.0 à 1.0)
-  double vx, vy;       // vitesse (direction libre)
-  final double radius; // rayon relatif
+  double x, y;
+  double vx, vy;
+  final double radius;
   final Color color;
 
   _BubbleData({
@@ -85,7 +93,6 @@ class _BubbleData {
     x += vx * dt;
     y += vy * dt;
 
-    // Rebond sur les bords
     if (x < 0) { x = 0; vx = vx.abs(); }
     if (x > 1) { x = 1; vx = -vx.abs(); }
     if (y < 0) { y = 0; vy = vy.abs(); }
@@ -110,12 +117,12 @@ class _GlobalAnimatedBackgroundState extends State<_GlobalAnimatedBackground>
   double _lastTime = 0;
 
   static const _colors = [
-    Color(0xFF00004D), // bleu nuit
-    Color(0xFF4F6FFF), // bleu électrique
-    Color(0xFF00C9A7), // mint
-    Color(0xFF7B5EA7), // violet
-    Color(0xFF1A1AAD), // bleu glow
-    Color(0xFFE8A838), // or
+    Color(0xFF00004D),
+    Color(0xFF4F6FFF),
+    Color(0xFF00C9A7),
+    Color(0xFF7B5EA7),
+    Color(0xFF1A1AAD),
+    Color(0xFFE8A838),
   ];
 
   @override
@@ -123,18 +130,16 @@ class _GlobalAnimatedBackgroundState extends State<_GlobalAnimatedBackground>
     super.initState();
     final rng = math.Random(42);
 
-    // 10 bulles avec positions et vitesses aléatoires
     _bubbles = List.generate(10, (i) {
       final color = _colors[i % _colors.length];
-      // Vitesses variées dans toutes les directions
       final angle = rng.nextDouble() * math.pi * 2;
-      final speed = 0.01 + rng.nextDouble() * 0.03; // vitesse variable
+      final speed = 0.01 + rng.nextDouble() * 0.03;
       return _BubbleData(
         x: rng.nextDouble(),
         y: rng.nextDouble(),
         vx: math.cos(angle) * speed,
         vy: math.sin(angle) * speed,
-        radius: 0.012 + rng.nextDouble() * 0.02, // taille variée petite
+        radius: 0.012 + rng.nextDouble() * 0.02,
         color: color.withOpacity(0.35 + rng.nextDouble() * 0.25),
       );
     });
@@ -179,13 +184,11 @@ class _BubblePainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
 
-    // Fond blanc
     canvas.drawRect(
       Rect.fromLTWH(0, 0, w, h),
       Paint()..color = Colors.white,
     );
 
-    // Grille subtile
     final gridPaint = Paint()
       ..color = const Color(0xFF00004D).withOpacity(0.04)
       ..strokeWidth = 0.8;
@@ -196,16 +199,12 @@ class _BubblePainter extends CustomPainter {
       canvas.drawLine(Offset(0, h / 18 * i), Offset(w, h / 18 * i), gridPaint);
     }
 
-    // Dessiner les bulles
     for (final b in bubbles) {
       final cx = b.x * w;
       final cy = b.y * h;
       final r = b.radius * w;
 
-      // Cercle solide
       canvas.drawCircle(Offset(cx, cy), r, Paint()..color = b.color);
-
-      // Petit reflet blanc en haut à gauche
       canvas.drawCircle(
         Offset(cx - r * 0.3, cy - r * 0.3),
         r * 0.25,
