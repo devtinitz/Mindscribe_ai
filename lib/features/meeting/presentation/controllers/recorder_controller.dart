@@ -1,6 +1,7 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
+import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
@@ -31,7 +32,6 @@ class RecorderController extends GetxController {
   final UploadMeetingAudio _uploadMeetingAudio;
   final GetMeetings _getMeetings;
 
-  // ── Champ titre ───────────────────────────────────────────────────
   final titleController = TextEditingController();
 
   final isRecording = false.obs;
@@ -47,6 +47,9 @@ class RecorderController extends GetxController {
   final playbackPosition = Duration.zero.obs;
   final playbackDuration = Duration.zero.obs;
 
+  // Sur web, on stocke les bytes en mémoire
+  Uint8List? _webAudioBytes;
+
   final AudioPlayer _player = AudioPlayer();
   StreamSubscription? _positionSub;
   StreamSubscription? _durationSub;
@@ -56,12 +59,13 @@ class RecorderController extends GetxController {
     try {
       await _resetPlayer();
       hasRecorded.value = false;
+      _webAudioBytes = null;
 
-      // ── Demande permission micro sur web ──────────────────────────
       if (kIsWeb) {
         final hasPermission = await AudioRecorder().hasPermission();
         if (!hasPermission) {
-          status.value = 'Permission microphone refusée. Autorisez l\'accès dans votre navigateur.';
+          status.value =
+              'Permission microphone refusée. Autorisez l\'accès dans votre navigateur.';
           return;
         }
       }
@@ -85,7 +89,14 @@ class RecorderController extends GetxController {
       recordedFilePath.value = path;
       isRecording.value = false;
       _timer?.cancel();
-      await _loadAudioForPlayback(path);
+
+      if (kIsWeb) {
+        // Sur web, on charge l'audio via l'URL blob retournée par record
+        await _loadAudioForPlaybackWeb(path);
+      } else {
+        await _loadAudioForPlayback(path);
+      }
+
       hasRecorded.value = true;
       status.value = 'Enregistrement terminé';
     } catch (e) {
@@ -95,25 +106,44 @@ class RecorderController extends GetxController {
     }
   }
 
+  // ── Playback mobile ───────────────────────────────────────────────
   Future<void> _loadAudioForPlayback(String path) async {
     try {
       await _player.setFilePath(path);
-      _durationSub = _player.durationStream.listen((d) {
-        if (d != null) playbackDuration.value = d;
-      });
-      _positionSub = _player.positionStream.listen((p) {
-        playbackPosition.value = p;
-      });
-      _playerStateSub = _player.playerStateStream.listen((state) {
-        isPlaying.value = state.playing;
-        if (state.processingState == ProcessingState.completed) {
-          isPlaying.value = false;
-          _player.seek(Duration.zero);
-        }
-      });
+      _listenToPlayer();
     } catch (e) {
       status.value = 'Erreur lecteur: $e';
     }
+  }
+
+  // ── Playback web (blob URL ou bytes) ─────────────────────────────
+  Future<void> _loadAudioForPlaybackWeb(String path) async {
+    try {
+      // Sur web, record retourne une blob URL (ex: blob:http://...)
+      // just_audio peut la lire directement via setUrl
+      await _player.setUrl(path);
+      _listenToPlayer();
+    } catch (e) {
+      // Si setUrl échoue, on désactive juste le playback web
+      // mais l'upload reste possible
+      status.value = 'Enregistrement terminé (aperçu non disponible sur web)';
+    }
+  }
+
+  void _listenToPlayer() {
+    _durationSub = _player.durationStream.listen((d) {
+      if (d != null) playbackDuration.value = d;
+    });
+    _positionSub = _player.positionStream.listen((p) {
+      playbackPosition.value = p;
+    });
+    _playerStateSub = _player.playerStateStream.listen((state) {
+      isPlaying.value = state.playing;
+      if (state.processingState == ProcessingState.completed) {
+        isPlaying.value = false;
+        _player.seek(Duration.zero);
+      }
+    });
   }
 
   void togglePlayback() {
@@ -132,13 +162,17 @@ class RecorderController extends GetxController {
     await _resetPlayer();
     hasRecorded.value = false;
     recordedFilePath.value = null;
+    _webAudioBytes = null;
     status.value = 'Prêt';
     elapsedSeconds.value = 0;
   }
 
   Future<void> validateAndUpload() async {
     final path = recordedFilePath.value;
-    if (path == null) return;
+    if (path == null) {
+      status.value = 'Aucun enregistrement à envoyer.';
+      return;
+    }
     await _resetPlayer();
     await _uploadRecording(path);
   }
@@ -160,24 +194,18 @@ class RecorderController extends GetxController {
       status.value = 'Audio envoyé !';
       hasRecorded.value = false;
 
-      // ── Envoie les invitations aux participants sélectionnés ──────
       try {
         final participantsController = Get.find<ParticipantsController>();
         if (participantsController.selectedIds.isNotEmpty) {
           await participantsController.sendInvitations(meeting.id ?? 0);
         }
-      } catch (_) {
-        // Pas bloquant si le controller n'est pas disponible
-      }
+      } catch (_) {}
 
-      // ── Charge le détail et démarre le polling ────────────────────
       final meetingsController = Get.find<MeetingsController>();
       await meetingsController.loadMeetingDetail(meeting.id ?? 0);
       await meetingsController.loadMeetings();
 
-      // ── Redirige vers le détail ───────────────────────────────────
       Get.toNamed(AppRoutes.meetingDetail, arguments: meeting.id);
-
     } catch (e) {
       status.value = 'Erreur upload: $e';
     } finally {
