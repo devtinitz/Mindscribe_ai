@@ -11,7 +11,7 @@ class ForgotPasswordPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(PasswordResetController());
-    
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
@@ -153,9 +153,47 @@ class ForgotPasswordPage extends StatelessWidget {
                           border: Border.all(
                               color: AppColors.danger.withOpacity(0.3)),
                         ),
-                        child: Text(err,
-                            style: const TextStyle(
-                                color: AppColors.danger, fontSize: 13)),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.error_outline_rounded,
+                                color: AppColors.danger, size: 16),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(err,
+                                  style: const TextStyle(
+                                      color: AppColors.danger, fontSize: 13)),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+
+                    // Message succès renvoi
+                    Obx(() {
+                      final msg = controller.successMessage.value;
+                      if (msg == null) return const SizedBox();
+                      return Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.only(bottom: 16),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.success.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                              color: AppColors.success.withOpacity(0.3)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.check_circle_outline_rounded,
+                                color: AppColors.success, size: 16),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(msg,
+                                  style: const TextStyle(
+                                      color: AppColors.success, fontSize: 13)),
+                            ),
+                          ],
+                        ),
                       );
                     }),
 
@@ -184,8 +222,7 @@ class ForgotPasswordPage extends StatelessWidget {
                                     ),
                                   )
                                 : const Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Icon(Icons.send_rounded,
                                           color: Colors.white, size: 18),
@@ -202,6 +239,53 @@ class ForgotPasswordPage extends StatelessWidget {
                                   ),
                           ),
                         )),
+
+                    const SizedBox(height: 12),
+
+                    // ── Bouton renvoyer le code (toujours visible après 1er envoi) ──
+                    Obx(() {
+                      if (!controller.codeSent.value) return const SizedBox();
+                      return SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: OutlinedButton(
+                          onPressed: controller.isResending.value
+                              ? null
+                              : controller.resendCode,
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: AppColors.primary),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: controller.isResending.value
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.primary,
+                                  ),
+                                )
+                              : const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.refresh_rounded,
+                                        color: AppColors.primary, size: 18),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Renvoyer le code',
+                                      style: TextStyle(
+                                        color: AppColors.primary,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                        ),
+                      );
+                    }),
                   ],
                 ),
               ),
@@ -217,10 +301,10 @@ class ForgotPasswordPage extends StatelessWidget {
                       text: 'Vous vous souvenez ? ',
                       style: TextStyle(
                           fontSize: 14, color: AppColors.textSecondary),
-                      children: [
+                      children: const [
                         TextSpan(
                           text: 'Se connecter',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppColors.primary,
                             fontWeight: FontWeight.w600,
                           ),

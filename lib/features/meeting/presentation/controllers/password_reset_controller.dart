@@ -11,9 +11,12 @@ class PasswordResetController extends GetxController {
   final newPasswordController = TextEditingController();
 
   final isLoading = false.obs;
+  final isResending = false.obs;
   final isResetting = false.obs;
   final errorMessage = RxnString();
+  final successMessage = RxnString();
   final obscurePassword = true.obs;
+  final codeSent = false.obs; // true après le premier envoi
 
   void toggleObscure() => obscurePassword.value = !obscurePassword.value;
 
@@ -26,6 +29,7 @@ class PasswordResetController extends GetxController {
 
     isLoading.value = true;
     errorMessage.value = null;
+    successMessage.value = null;
 
     try {
       final dio = Get.find<Dio>();
@@ -33,16 +37,51 @@ class PasswordResetController extends GetxController {
         'email': emailController.text.trim(),
       });
 
-      // Redirige vers la page de reset avec l'email
+      codeSent.value = true;
+
       Get.toNamed(
         AppRoutes.resetPassword,
         arguments: emailController.text.trim(),
       );
-
     } catch (e) {
-      errorMessage.value = 'Une erreur est survenue. Réessayez.';
+      if (e is DioException && e.response?.statusCode == 422) {
+        final errors = e.response?.data?['errors'];
+        if (errors is Map && errors['email'] is List) {
+          errorMessage.value = errors['email'][0].toString();
+        } else {
+          errorMessage.value = e.response?.data?['message']?.toString() ??
+              'Une erreur est survenue. Réessayez.';
+        }
+      } else {
+        errorMessage.value = 'Une erreur est survenue. Réessayez.';
+      }
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  // ── Renvoie le code ───────────────────────────────────────────────
+  Future<void> resendCode() async {
+    if (emailController.text.trim().isEmpty) {
+      errorMessage.value = 'Veuillez entrer votre email.';
+      return;
+    }
+
+    isResending.value = true;
+    errorMessage.value = null;
+    successMessage.value = null;
+
+    try {
+      final dio = Get.find<Dio>();
+      await dio.post('/auth/forgot-password', data: {
+        'email': emailController.text.trim(),
+      });
+
+      successMessage.value = 'Un nouveau code a été envoyé à votre email.';
+    } catch (e) {
+      errorMessage.value = 'Impossible de renvoyer le code. Réessayez.';
+    } finally {
+      isResending.value = false;
     }
   }
 
@@ -58,7 +97,8 @@ class PasswordResetController extends GetxController {
     }
 
     if (password.length < 6) {
-      errorMessage.value = 'Le mot de passe doit contenir au moins 6 caractères.';
+      errorMessage.value =
+          'Le mot de passe doit contenir au moins 6 caractères.';
       return;
     }
 
@@ -73,7 +113,6 @@ class PasswordResetController extends GetxController {
         'password': password,
       });
 
-      // ✅ Notification de succès (4000ms)
       Get.snackbar(
         '✅ Mot de passe réinitialisé !',
         'Votre mot de passe a été modifié avec succès. Connectez-vous.',
@@ -86,10 +125,8 @@ class PasswordResetController extends GetxController {
         icon: const Icon(Icons.check_circle_rounded, color: Colors.white),
       );
 
-      // Redirige vers le login
       await Future.delayed(const Duration(milliseconds: 1500));
       Get.offAllNamed(AppRoutes.login);
-
     } catch (e) {
       if (e is DioException && e.response?.statusCode == 422) {
         errorMessage.value = 'Code invalide ou expiré.';

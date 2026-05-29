@@ -47,7 +47,6 @@ class RecorderController extends GetxController {
   final playbackPosition = Duration.zero.obs;
   final playbackDuration = Duration.zero.obs;
 
-  // Sur web, on stocke les bytes en mémoire
   Uint8List? _webAudioBytes;
 
   final AudioPlayer _player = AudioPlayer();
@@ -85,15 +84,17 @@ class RecorderController extends GetxController {
 
   Future<void> stopRecording() async {
     try {
+      _timer?.cancel();
+      isRecording.value = false;
+
       final path = await _stopRecording();
       recordedFilePath.value = path;
-      isRecording.value = false;
-      _timer?.cancel();
 
       if (kIsWeb) {
-        // Sur web, on charge l'audio via l'URL blob retournée par record
         await _loadAudioForPlaybackWeb(path);
       } else {
+        // Sur Android/iOS, on attend un peu que le fichier soit bien écrit
+        await Future.delayed(const Duration(milliseconds: 500));
         await _loadAudioForPlayback(path);
       }
 
@@ -110,22 +111,26 @@ class RecorderController extends GetxController {
   Future<void> _loadAudioForPlayback(String path) async {
     try {
       await _player.setFilePath(path);
+
+      // Attend que la durée soit disponible (max 3 secondes)
+      int attempts = 0;
+      while (playbackDuration.value == Duration.zero && attempts < 30) {
+        await Future.delayed(const Duration(milliseconds: 100));
+        attempts++;
+      }
+
       _listenToPlayer();
     } catch (e) {
       status.value = 'Erreur lecteur: $e';
     }
   }
 
-  // ── Playback web (blob URL ou bytes) ─────────────────────────────
+  // ── Playback web ──────────────────────────────────────────────────
   Future<void> _loadAudioForPlaybackWeb(String path) async {
     try {
-      // Sur web, record retourne une blob URL (ex: blob:http://...)
-      // just_audio peut la lire directement via setUrl
       await _player.setUrl(path);
       _listenToPlayer();
     } catch (e) {
-      // Si setUrl échoue, on désactive juste le playback web
-      // mais l'upload reste possible
       status.value = 'Enregistrement terminé (aperçu non disponible sur web)';
     }
   }
@@ -169,11 +174,20 @@ class RecorderController extends GetxController {
 
   Future<void> validateAndUpload() async {
     final path = recordedFilePath.value;
-    if (path == null) {
+    if (path == null || path.isEmpty) {
       status.value = 'Aucun enregistrement à envoyer.';
       return;
     }
-    await _resetPlayer();
+
+    // On stoppe le player SANS effacer le chemin
+    await _player.stop();
+    await _positionSub?.cancel();
+    await _durationSub?.cancel();
+    await _playerStateSub?.cancel();
+    _positionSub = null;
+    _durationSub = null;
+    _playerStateSub = null;
+
     await _uploadRecording(path);
   }
 
@@ -193,6 +207,7 @@ class RecorderController extends GetxController {
       uploadedMeeting.value = meeting;
       status.value = 'Audio envoyé !';
       hasRecorded.value = false;
+      recordedFilePath.value = null;
 
       try {
         final participantsController = Get.find<ParticipantsController>();
