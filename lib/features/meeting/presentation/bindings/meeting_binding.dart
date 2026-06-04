@@ -35,12 +35,13 @@ import '../interceptors/auth_interceptor.dart';
 
 class MeetingBinding extends Bindings {
   static String get _baseUrl {
-     if (kIsWeb) return 'http://192.168.1.54:8000/api';
-     if (defaultTargetPlatform == TargetPlatform.android) {
-    return 'http://192.168.1.54:8000/api';
+    const isWeb = kIsWeb;
+    if (isWeb) return 'http://localhost:8000/api';
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return 'http://10.0.2.2:8000/api';
+    }
+    return 'http://localhost:8000/api';
   }
-  return 'http://192.168.1.54:8000/api';
-}
 
   void _lazyPutIfAbsent<S>(S Function() builder) {
     if (!Get.isRegistered<S>()) {
