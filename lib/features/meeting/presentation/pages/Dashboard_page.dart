@@ -2,11 +2,13 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/design/index.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/meetings_controller.dart';
 import '../routes/app_routes.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_sidebar.dart';
+import '../widgets/common/index.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -29,16 +31,18 @@ class DashboardPage extends StatelessWidget {
         elevation: 0,
         leading: Builder(
           builder: (ctx) => Padding(
-            padding: const EdgeInsets.only(left: 12),
+            padding: const EdgeInsets.only(left: AppSpacing.sm),
             child: GestureDetector(
               onTap: () => Scaffold.of(ctx).openDrawer(),
               child: Container(
-                margin: const EdgeInsets.symmetric(vertical: 8),
+                margin: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
                 decoration: BoxDecoration(
                   color: AppColors.primary.withOpacity(0.07),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: AppRadius.mdRadius,
                   border: Border.all(
-                      color: AppColors.primary.withOpacity(0.15), width: 1),
+                    color: AppColors.primary.withOpacity(0.15),
+                    width: 1,
+                  ),
                 ),
                 child: const Icon(Icons.menu_rounded,
                     size: 20, color: AppColors.primary),
@@ -46,13 +50,9 @@ class DashboardPage extends StatelessWidget {
             ),
           ),
         ),
-        title: const Text(
+        title: Text(
           'Dashboard',
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w700,
-            color: AppColors.primary,
-          ),
+          style: AppTypography.subtitle2.copyWith(color: AppColors.primary),
         ),
         centerTitle: true,
       ),
@@ -99,72 +99,62 @@ class DashboardPage extends StatelessWidget {
         });
 
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+          padding: AppSpacing.paddingLg,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ── Salutation ──
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(20),
+                padding: AppSpacing.paddingLg,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [AppColors.primary, AppColors.primaryGlow],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withOpacity(0.3),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
+                  borderRadius: AppRadius.xlRadius,
+                  boxShadow: AppElevation.primary(0.3),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Bonjour ${user?.name?.split(' ').first ?? ''} 👋',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
-                      ),
+                      style: AppTypography.heading2.copyWith(color: Colors.white),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xs),
                     Text(
                       '$dayName ${now.day} $monthName ${now.year}',
-                      style: TextStyle(
+                      style: AppTypography.caption.copyWith(
                         color: Colors.white.withOpacity(0.8),
-                        fontSize: 13,
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.md),
                     GestureDetector(
                       onTap: () => Get.toNamed(AppRoutes.selectParticipants),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 10),
+                          horizontal: AppSpacing.md,
+                          vertical: AppSpacing.sm,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: AppRadius.mdRadius,
                           border: Border.all(
-                              color: Colors.white.withOpacity(0.3)),
+                            color: Colors.white.withOpacity(0.3),
+                          ),
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.mic_rounded,
+                            const Icon(Icons.mic_rounded,
                                 color: Colors.white, size: 16),
-                            SizedBox(width: 8),
+                            const SizedBox(width: AppSpacing.sm),
                             Text(
                               'Nouvelle réunion',
-                              style: TextStyle(
+                              style: AppTypography.labelMedium.copyWith(
                                 color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
                               ),
                             ),
                           ],
@@ -175,18 +165,13 @@ class DashboardPage extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
 
               // ── Statistiques ──
-              const Text(
-                'Vue d\'ensemble',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.text,
-                ),
+              AppSectionHeader(
+                title: 'Vue d\'ensemble',
+                icon: Icons.dashboard_rounded,
               ),
-              const SizedBox(height: 12),
 
               Row(
                 children: [
@@ -198,7 +183,7 @@ class DashboardPage extends StatelessWidget {
                       color: AppColors.primary,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppSpacing.base),
                   Expanded(
                     child: _StatCard(
                       label: 'Terminées',
@@ -207,7 +192,7 @@ class DashboardPage extends StatelessWidget {
                       color: AppColors.success,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppSpacing.base),
                   Expanded(
                     child: _StatCard(
                       label: 'En cours',
@@ -219,45 +204,27 @@ class DashboardPage extends StatelessWidget {
                 ],
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
 
               // ── Graphique 7 jours ──
-              const Text(
-                'Activité cette semaine',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.text,
-                ),
+              AppSectionHeader(
+                title: 'Activité cette semaine',
+                icon: Icons.trending_up_rounded,
               ),
-              const SizedBox(height: 12),
 
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.border),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
+              AppCard(
+                variant: AppCardVariant.outlined,
+                padding: AppSpacing.paddingLg,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       '${weekData.reduce((a, b) => a + b).toInt()} réunions sur 7 jours',
-                      style: TextStyle(
-                        fontSize: 12,
+                      style: AppTypography.caption.copyWith(
                         color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.md),
                     SizedBox(
                       height: 160,
                       child: BarChart(
@@ -363,238 +330,140 @@ class DashboardPage extends StatelessWidget {
 
               // ── Tâches en attente ──
               if (pendingTasks.isNotEmpty) ...[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Tâches en attente',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.text,
+                AppSectionHeader(
+                  title: 'Tâches en attente',
+                  icon: Icons.task_alt_rounded,
+                  trailing: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.base,
+                      vertical: AppSpacing.xs,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.danger.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      '${pendingTasks.length}',
+                      style: AppTypography.labelSmall.copyWith(
+                        color: AppColors.danger,
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppColors.danger.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        '${pendingTasks.length}',
-                        style: const TextStyle(
-                          color: AppColors.danger,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12,
+                  ),
+                ),
+                ...pendingTasks.take(5).map((task) => Padding(
+                      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                      child: AppCard(
+                        variant: AppCardVariant.outlined,
+                        padding: AppSpacing.paddingBase,
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 20,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: AppColors.primary,
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.base),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    task['title'] ?? '',
+                                    style: AppTypography.labelMedium,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    '${task['assignee']} — ${task['meeting']}',
+                                    style: AppTypography.caption,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Icon(Icons.arrow_forward_ios_rounded,
+                                size: 14, color: AppColors.hint),
+                          ],
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                ...pendingTasks.take(5).map((task) => Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 20,
-                            height: 20,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                  color: AppColors.primary, width: 2),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  task['title'] ?? '',
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.text,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  '${task['assignee']} — ${task['meeting']}',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Icon(Icons.arrow_forward_ios_rounded,
-                              size: 14, color: AppColors.hint),
-                        ],
-                      ),
                     )),
-                const SizedBox(height: 24),
+                const SizedBox(height: AppSpacing.lg),
               ],
 
               // ── Réunions récentes ──
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Réunions récentes',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.text,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () => Get.toNamed(AppRoutes.meetings),
-                    child: const Text('Voir tout'),
-                  ),
-                ],
+              AppSectionHeader(
+                title: 'Réunions récentes',
+                icon: Icons.history_rounded,
+                trailing: TextButton(
+                  onPressed: () => Get.toNamed(AppRoutes.meetings),
+                  child: const Text('Voir tout'),
+                ),
               ),
 
-              const SizedBox(height: 8),
-
               if (recent.isEmpty)
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: Column(
-                    children: [
-                      Icon(Icons.mic_off_rounded,
-                          size: 48, color: AppColors.hint),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Aucune réunion pour le moment',
-                        style: TextStyle(
-                            color: AppColors.textSecondary, fontSize: 14),
-                      ),
-                      const SizedBox(height: 12),
-                      ElevatedButton.icon(
-                        onPressed: () => Get.toNamed(AppRoutes.selectParticipants),
-                        icon: const Icon(Icons.mic_rounded, size: 16),
-                        label: const Text('Commencer'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                        ),
-                      ),
-                    ],
-                  ),
+                EmptyState(
+                  icon: Icons.mic_off_rounded,
+                  title: 'Aucune réunion pour le moment',
+                  subtitle: 'Commencez votre première réunion',
+                  buttonLabel: 'Nouvelle réunion',
+                  onButtonPressed: () => Get.toNamed(AppRoutes.selectParticipants),
                 )
               else
                 ...recent.map((meeting) {
-                  Color statusColor;
-                  IconData statusIcon;
-                  String statusLabel;
+                  final statusType = switch (meeting.status) {
+                    'done' => StatusType.done,
+                    'failed' => StatusType.failed,
+                    'processing' => StatusType.processing,
+                    _ => StatusType.pending,
+                  };
 
-                  switch (meeting.status) {
-                    case 'done':
-                      statusColor = AppColors.success;
-                      statusIcon = Icons.check_circle_rounded;
-                      statusLabel = 'Terminé';
-                      break;
-                    case 'failed':
-                      statusColor = AppColors.danger;
-                      statusIcon = Icons.error_rounded;
-                      statusLabel = 'Erreur';
-                      break;
-                    case 'processing':
-                      statusColor = AppColors.primary;
-                      statusIcon = Icons.autorenew_rounded;
-                      statusLabel = 'En cours';
-                      break;
-                    default:
-                      statusColor = Colors.orange;
-                      statusIcon = Icons.hourglass_top_rounded;
-                      statusLabel = 'En attente';
-                  }
-
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 10),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.border),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.03),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: ListTile(
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                    child: AppCard(
+                      variant: AppCardVariant.outlined,
                       onTap: () {
                         Get.find<MeetingsController>()
                             .loadMeetingDetail(meeting.id ?? 0);
                         Get.toNamed(AppRoutes.meetingDetail,
                             arguments: meeting.id);
                       },
-                      leading: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(Icons.mic_rounded,
-                            color: AppColors.primary, size: 20),
-                      ),
-                      title: Text(
-                        meeting.title,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      subtitle: Text(
-                        '${meeting.createdAt.day.toString().padLeft(2, '0')}/${meeting.createdAt.month.toString().padLeft(2, '0')}/${meeting.createdAt.year}',
-                        style: TextStyle(
-                            fontSize: 12, color: AppColors.textSecondary),
-                      ),
-                      trailing: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: statusColor.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(statusIcon, size: 12, color: statusColor),
-                            const SizedBox(width: 4),
-                            Text(
-                              statusLabel,
-                              style: TextStyle(
-                                color: statusColor,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 11,
-                              ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withOpacity(0.08),
+                              borderRadius: AppRadius.mdRadius,
                             ),
-                          ],
-                        ),
+                            child: const Icon(Icons.mic_rounded,
+                                color: AppColors.primary, size: 20),
+                          ),
+                          const SizedBox(width: AppSpacing.md),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  meeting.title,
+                                  style: AppTypography.labelLarge,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  '${meeting.createdAt.day.toString().padLeft(2, '0')}/${meeting.createdAt.month.toString().padLeft(2, '0')}/${meeting.createdAt.year}',
+                                  style: AppTypography.caption,
+                                ),
+                              ],
+                            ),
+                          ),
+                          StatusBadge(status: statusType),
+                        ],
                       ),
                     ),
                   );
@@ -626,20 +495,9 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    return AppCard(
+      variant: AppCardVariant.outlined,
+      padding: AppSpacing.paddingMd,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -648,26 +506,20 @@ class _StatCard extends StatelessWidget {
             height: 36,
             decoration: BoxDecoration(
               color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: AppRadius.smRadius,
             ),
             child: Icon(icon, color: color, size: 18),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.base),
           Text(
             value,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-              color: color,
-            ),
+            style: AppTypography.heading2.copyWith(color: color),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             label,
-            style: TextStyle(
-              fontSize: 11,
+            style: AppTypography.caption.copyWith(
               color: AppColors.textSecondary,
-              fontWeight: FontWeight.w500,
             ),
           ),
         ],
