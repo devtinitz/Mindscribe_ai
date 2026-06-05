@@ -30,27 +30,25 @@ class EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-        child: Container(
-          margin: const EdgeInsets.all(AppSpacing.lg),
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.15),
-            borderRadius: AppRadius.xlRadius,
-            border: Border.all(
-              color: Colors.white.withOpacity(0.25),
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-            ],
+      child: Container(
+        margin: const EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.9),
+          borderRadius: AppRadius.xlRadius,
+          border: Border.all(
+            color: Colors.grey.withOpacity(0.2),
+            width: 1,
           ),
-          child: Column(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -108,7 +106,6 @@ class EmptyState extends StatelessWidget {
             ],
           ),
         ),
-      ),
     );
   }
 }
