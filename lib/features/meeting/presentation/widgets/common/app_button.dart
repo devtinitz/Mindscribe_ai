@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../../../core/design/animations.dart';
-import '../../../../core/design/radius.dart';
-import '../../../../core/design/spacing.dart';
-import '../../../../core/design/typography.dart';
-import '../../../theme/app_colors.dart';
+import '../../../../../core/design/animations.dart';
+import '../../../../../core/design/radius.dart';
+import '../../../../../core/design/spacing.dart';
+import '../../../../../core/design/typography.dart';
+import '../../theme/app_colors.dart';
 
 enum AppButtonVariant { primary, secondary, outlined, ghost }
 enum AppButtonSize { small, medium, large }

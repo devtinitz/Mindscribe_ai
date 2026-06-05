@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../core/design/elevation.dart';
-import '../../../../core/design/radius.dart';
-import '../../../theme/app_colors.dart';
+import '../../../../../core/design/elevation.dart';
+import '../../../../../core/design/radius.dart';
+import '../../theme/app_colors.dart';
 
 enum AppCardVariant { elevated, flat, outlined }
 

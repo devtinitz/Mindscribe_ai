@@ -2,7 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../core/design/index.dart';
+import '../../../../core/design/index.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/meetings_controller.dart';
 import '../routes/app_routes.dart';

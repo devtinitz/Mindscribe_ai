@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../core/design/spacing.dart';
-import '../../../../core/design/typography.dart';
-import '../../../theme/app_colors.dart';
+import '../../../../../core/design/spacing.dart';
+import '../../../../../core/design/typography.dart';
+import '../../theme/app_colors.dart';
 
 class AppSectionHeader extends StatelessWidget {
   final String title;

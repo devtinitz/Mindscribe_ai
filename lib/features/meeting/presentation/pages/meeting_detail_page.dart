@@ -438,7 +438,7 @@ class MeetingDetailPage extends GetView<MeetingsController> {
 
           // ── Lecteur audio ─────────────────────────────────────────
           if (meeting.audioPath != null && meeting.audioPath!.isNotEmpty)
-            _AudioPlayerWidget(audioUrl: 'http://192.168.1.54:8000/storage/${meeting.audioPath}'),
+            _AudioPlayerWidget(audioUrl: 'http://192.168.1.22:8000/storage/${meeting.audioPath}'),
 
           const SizedBox(height: 16),
           SizedBox(

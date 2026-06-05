@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../../core/design/radius.dart';
-import '../../../../core/design/spacing.dart';
-import '../../../../core/design/typography.dart';
-import '../../../theme/app_colors.dart';
+import '../../../../../core/design/radius.dart';
+import '../../../../../core/design/spacing.dart';
+import '../../../../../core/design/typography.dart';
+import '../../theme/app_colors.dart';
 
 enum StatusType { pending, processing, done, failed }
 
