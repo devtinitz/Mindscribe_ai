@@ -51,8 +51,8 @@ class AppCard extends StatelessWidget {
   Color _getBackgroundColor() {
     return switch (variant) {
       AppCardVariant.elevated => Colors.white,
-      AppCardVariant.flat => Colors.white.withOpacity(0.85),
-      AppCardVariant.outlined => Colors.white.withOpacity(0.9),
+      AppCardVariant.flat => Colors.white.withOpacity(0.95),
+      AppCardVariant.outlined => Colors.white,
     };
   }
 
