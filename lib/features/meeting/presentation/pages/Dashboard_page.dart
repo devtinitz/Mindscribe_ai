@@ -1,14 +1,17 @@
+import 'dart:ui';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../core/design/index.dart';
+import '../../../../core/design/glassmorphism.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/meetings_controller.dart';
 import '../routes/app_routes.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_sidebar.dart';
 import '../widgets/common/index.dart';
+import '../widgets/common/glass_card.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -104,18 +107,33 @@ class DashboardPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ── Salutation ──
-              Container(
-                width: double.infinity,
-                padding: AppSpacing.paddingLg,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppColors.primary, AppColors.primaryGlow],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+              BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Container(
+                  width: double.infinity,
+                  padding: AppSpacing.paddingLg,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.primary.withOpacity(0.8),
+                        AppColors.primaryGlow.withOpacity(0.8),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: AppRadius.xlRadius,
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.2),
+                      width: 1.5,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.3),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
                   ),
-                  borderRadius: AppRadius.xlRadius,
-                  boxShadow: AppElevation.primary(0.3),
-                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -163,6 +181,7 @@ class DashboardPage extends StatelessWidget {
                     ),
                   ],
                 ),
+              ),
               ),
 
               const SizedBox(height: AppSpacing.lg),
