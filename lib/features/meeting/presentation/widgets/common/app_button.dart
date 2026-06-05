@@ -59,6 +59,7 @@ class AppButton extends StatelessWidget {
           onPressed: isDisabled ? null : onPressed,
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
             disabledBackgroundColor: AppColors.hint.withOpacity(0.3),
             padding: _getPadding(),
             shape: AppRadius.mdButton,
@@ -70,6 +71,7 @@ class AppButton extends StatelessWidget {
           onPressed: isDisabled ? null : onPressed,
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.accent.withOpacity(0.1),
+            foregroundColor: AppColors.primary,
             disabledBackgroundColor: AppColors.hint.withOpacity(0.1),
             padding: _getPadding(),
             shape: AppRadius.mdButton,
@@ -80,6 +82,7 @@ class AppButton extends StatelessWidget {
       AppButtonVariant.outlined => OutlinedButton(
           onPressed: isDisabled ? null : onPressed,
           style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.primary,
             side: BorderSide(
               color: isDisabled ? AppColors.hint : AppColors.primary,
             ),
@@ -91,6 +94,7 @@ class AppButton extends StatelessWidget {
       AppButtonVariant.ghost => TextButton(
           onPressed: isDisabled ? null : onPressed,
           style: TextButton.styleFrom(
+            foregroundColor: AppColors.primary,
             padding: _getPadding(),
             shape: AppRadius.mdButton,
           ),
