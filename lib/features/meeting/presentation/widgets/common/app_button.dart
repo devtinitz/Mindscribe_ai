@@ -32,25 +32,28 @@ class AppButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDisabled = onPressed == null || isLoading;
 
+    final textColor = _getTextColor(isDisabled);
+
     Widget buttonContent = isLoading
         ? SizedBox(
             height: _getHeight() * 0.5,
             width: _getHeight() * 0.5,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation(
-                _getTextColor(isDisabled),
-              ),
+              valueColor: AlwaysStoppedAnimation(textColor),
             ),
           )
         : Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               if (icon != null) ...[
-                Icon(icon, size: _getIconSize()),
+                Icon(icon, size: _getIconSize(), color: textColor),
                 SizedBox(width: AppSpacing.sm),
               ],
-              Text(label, style: _getTextStyle()),
+              Text(
+                label,
+                style: _getTextStyle().copyWith(color: textColor),
+              ),
             ],
           );
 
