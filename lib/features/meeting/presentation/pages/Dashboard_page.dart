@@ -415,8 +415,8 @@ class DashboardPage extends StatelessWidget {
                   title: 'Aucune réunion pour le moment',
                   subtitle: 'Commencez votre première réunion',
                   buttonLabel: 'Enregistrement',
-                  buttonSize: AppButtonSize.medium,
-                  isFullWidth: false,
+                  buttonSize: AppButtonSize.large,
+                  isFullWidth: true,
                   onButtonPressed: () => Get.toNamed(AppRoutes.selectParticipants),
                 )
               else
