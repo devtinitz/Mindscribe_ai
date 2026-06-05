@@ -1,17 +1,14 @@
-import 'dart:ui';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../core/design/index.dart';
-import '../../../../core/design/glassmorphism.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/meetings_controller.dart';
 import '../routes/app_routes.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_sidebar.dart';
 import '../widgets/common/index.dart';
-import '../widgets/common/glass_card.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
