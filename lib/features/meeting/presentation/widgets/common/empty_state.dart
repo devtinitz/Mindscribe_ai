@@ -99,7 +99,7 @@ class EmptyState extends StatelessWidget {
                   onPressed: onButtonPressed,
                   size: AppButtonSize.large,
                   isFullWidth: true,
-                  icon: Icons.sparkles_rounded,
+                  icon: Icons.auto_awesome_rounded,
                 ),
               ]
             ],

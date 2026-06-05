@@ -1,8 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import '../../../../core/design/radius.dart';
-import '../../../../core/design/spacing.dart';
-import '../../../theme/app_colors.dart';
+import '../../../../../core/design/radius.dart';
+import '../../../../../core/design/spacing.dart';
+import '../../theme/app_colors.dart';
 
 enum GlassCardVariant { light, dark, colored }
 
