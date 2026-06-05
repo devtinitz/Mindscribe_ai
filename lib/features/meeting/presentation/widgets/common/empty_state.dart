@@ -95,12 +95,33 @@ class EmptyState extends StatelessWidget {
               // ── Button ────────────────────────────────────────────
               if (buttonLabel != null && onButtonPressed != null) ...[
                 const SizedBox(height: AppSpacing.xl),
-                AppButton(
-                  label: buttonLabel!,
-                  onPressed: onButtonPressed,
-                  size: buttonSize,
-                  isFullWidth: isFullWidth,
-                  icon: Icons.mic_rounded,
+                GestureDetector(
+                  onTap: onButtonPressed,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                      vertical: AppSpacing.md,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: AppRadius.lgRadius,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.mic_rounded, color: Colors.white, size: 18),
+                        const SizedBox(width: AppSpacing.sm),
+                        Text(
+                          buttonLabel!,
+                          style: AppTypography.labelLarge.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ]
             ],
