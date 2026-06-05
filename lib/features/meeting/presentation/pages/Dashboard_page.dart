@@ -107,33 +107,22 @@ class DashboardPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ── Salutation ──
-              BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Container(
-                  width: double.infinity,
-                  padding: AppSpacing.paddingLg,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        AppColors.primary.withOpacity(0.8),
-                        AppColors.primaryGlow.withOpacity(0.8),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: AppRadius.xlRadius,
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.2),
-                      width: 1.5,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primary.withOpacity(0.3),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
+              Container(
+                width: double.infinity,
+                padding: AppSpacing.paddingLg,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppColors.primary, AppColors.primaryGlow],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
+                  borderRadius: AppRadius.xlRadius,
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.15),
+                    width: 1,
+                  ),
+                  boxShadow: AppElevation.primary(0.25),
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -181,7 +170,6 @@ class DashboardPage extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
               ),
 
               const SizedBox(height: AppSpacing.lg),
@@ -429,7 +417,9 @@ class DashboardPage extends StatelessWidget {
                   icon: Icons.mic_off_rounded,
                   title: 'Aucune réunion pour le moment',
                   subtitle: 'Commencez votre première réunion',
-                  buttonLabel: 'Nouvelle réunion',
+                  buttonLabel: 'Enregistrement',
+                  buttonSize: AppButtonSize.medium,
+                  isFullWidth: false,
                   onButtonPressed: () => Get.toNamed(AppRoutes.selectParticipants),
                 )
               else

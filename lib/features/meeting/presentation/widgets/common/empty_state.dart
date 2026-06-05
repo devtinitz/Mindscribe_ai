@@ -13,6 +13,8 @@ class EmptyState extends StatelessWidget {
   final String? buttonLabel;
   final VoidCallback? onButtonPressed;
   final Color? iconColor;
+  final AppButtonSize buttonSize;
+  final bool isFullWidth;
 
   const EmptyState({
     required this.icon,
@@ -21,6 +23,8 @@ class EmptyState extends StatelessWidget {
     this.buttonLabel,
     this.onButtonPressed,
     this.iconColor,
+    this.buttonSize = AppButtonSize.medium,
+    this.isFullWidth = true,
     super.key,
   });
 
@@ -97,9 +101,9 @@ class EmptyState extends StatelessWidget {
                 AppButton(
                   label: buttonLabel!,
                   onPressed: onButtonPressed,
-                  size: AppButtonSize.large,
-                  isFullWidth: true,
-                  icon: Icons.auto_awesome_rounded,
+                  size: buttonSize,
+                  isFullWidth: isFullWidth,
+                  icon: Icons.mic_rounded,
                 ),
               ]
             ],
