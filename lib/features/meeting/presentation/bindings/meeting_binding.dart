@@ -34,13 +34,17 @@ import '../controllers/recorder_controller.dart';
 import '../interceptors/auth_interceptor.dart';
 
 class MeetingBinding extends Bindings {
+  // ⚠️ À METTRE À JOUR SI L'IP LOCALE CHANGE
+  static const String _backendHost = '192.168.1.51';
+  static const int _backendPort = 8000;
+
   static String get _baseUrl {
     const isWeb = kIsWeb;
-    if (isWeb) return 'http://192.168.1.51:8000/api';
+    if (isWeb) return 'http://$_backendHost:$_backendPort/api';
     if (defaultTargetPlatform == TargetPlatform.android) {
-      return 'http://192.168.1.51:8000/api';
+      return 'http://10.0.2.2:$_backendPort/api'; // IP spéciale Android émulateur
     }
-    return 'http://192.168.1.51:8000/api';
+    return 'http://$_backendHost:$_backendPort/api';
   }
 
   void _lazyPutIfAbsent<S>(S Function() builder) {
