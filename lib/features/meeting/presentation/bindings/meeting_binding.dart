@@ -35,7 +35,7 @@ import '../interceptors/auth_interceptor.dart';
 
 class MeetingBinding extends Bindings {
   // ⚠️ À METTRE À JOUR SI L'IP LOCALE CHANGE
-  static const String _backendHost = '192.168.1.51';
+  static const String _backendHost = '192.168.1.44';
   static const int _backendPort = 8000;
 
   static String get _baseUrl {

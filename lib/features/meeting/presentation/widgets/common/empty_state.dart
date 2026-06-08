@@ -95,31 +95,32 @@ class EmptyState extends StatelessWidget {
               // ── Button ────────────────────────────────────────────
               if (buttonLabel != null && onButtonPressed != null) ...[
                 const SizedBox(height: AppSpacing.xl),
-                GestureDetector(
-                  onTap: onButtonPressed,
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.lg,
-                      vertical: AppSpacing.md,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: AppRadius.lgRadius,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.mic_rounded, color: Colors.white, size: 18),
-                        const SizedBox(width: AppSpacing.sm),
-                        Text(
-                          buttonLabel!,
-                          style: AppTypography.labelLarge.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
+                Center(
+                  child: GestureDetector(
+                    onTap: onButtonPressed,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: AppSpacing.sm,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: AppRadius.mdRadius,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.mic_rounded, color: Colors.white, size: 16),
+                          const SizedBox(width: AppSpacing.xs),
+                          Text(
+                            buttonLabel!,
+                            style: AppTypography.labelMedium.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),

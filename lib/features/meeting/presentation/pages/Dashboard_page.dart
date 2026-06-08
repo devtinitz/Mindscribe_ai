@@ -98,11 +98,13 @@ class DashboardPage extends StatelessWidget {
           return d[day.weekday - 1];
         });
 
-        return SingleChildScrollView(
-          padding: AppSpacing.paddingLg,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+        return Container(
+          color: Colors.white,
+          child: SingleChildScrollView(
+            padding: AppSpacing.paddingLg,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               // ── Salutation ──
               Container(
                 width: double.infinity,
@@ -477,6 +479,7 @@ class DashboardPage extends StatelessWidget {
 
               const SizedBox(height: 32),
             ],
+            ),
           ),
         );
       }),
