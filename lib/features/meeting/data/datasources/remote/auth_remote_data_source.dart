@@ -41,7 +41,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   Exception _handleDioError(DioException e) {
-    // Erreurs réseau / timeout
     if (e.type == DioExceptionType.connectionTimeout ||
         e.type == DioExceptionType.connectionError ||
         e.type == DioExceptionType.receiveTimeout ||

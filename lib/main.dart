@@ -2,15 +2,12 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_strategy/url_strategy.dart';
-
 import 'features/meeting/presentation/routes/app_pages.dart';
 import 'features/meeting/presentation/routes/app_routes.dart';
 import 'features/meeting/presentation/theme/app_colors.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  setPathUrlStrategy(); // Supprime le # dans les URLs web
   final prefs = await SharedPreferences.getInstance();
   Get.put<SharedPreferences>(prefs, permanent: true);
   runApp(const MyApp());

@@ -39,10 +39,9 @@ class MeetingBinding extends Bindings {
   static const int _backendPort = 8000;
 
   static String get _baseUrl {
-    const isWeb = kIsWeb;
-    if (isWeb) return 'http://$_backendHost:$_backendPort/api';
+    if (kIsWeb) return 'http://localhost:$_backendPort/api';
     if (defaultTargetPlatform == TargetPlatform.android) {
-      return 'http://10.0.2.2:$_backendPort/api'; // IP spéciale Android émulateur
+      return 'http://10.0.2.2:$_backendPort/api';
     }
     return 'http://$_backendHost:$_backendPort/api';
   }
